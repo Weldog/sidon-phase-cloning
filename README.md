@@ -7,7 +7,15 @@
 This repository contains the paper and everything needed to verify it. The archived, citable record is on Zenodo:
 **doi:10.5281/zenodo.23428376** (all versions; v2 = 10.5281/zenodo.23444464). The Zenodo record is the version of record.
 
-## What the paper shows
+## Paper 2 (companion note): Universal Cloning Is Optimal Exactly for Designs
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23449678.svg)](https://doi.org/10.5281/zenodo.23449678)
+
+For every probability measure on pure states and all T, k ≥ 1, the optimal average global fidelity of T→T+k cloning
+equals Werner's universal value D_T/D_{T+k} if and only if the measure is a complex projective (T+k)-design. Paper,
+source and exact certificates are in [`paper2/`](paper2/); archived at doi:10.5281/zenodo.23449679.
+
+## Paper 1: what the paper shows
 For quantum phase-state codebooks |ψ_x⟩ = d^{-1/2} Σ_j ω^{x k_j}|j⟩ (the states behind quantum fingerprinting and hashing),
 how well an adversary can clone or fuse the states is governed by additive combinatorics of the key set K:
 - 1→2 global cloning reaches the continuous optimum **iff K is a Sidon set**;

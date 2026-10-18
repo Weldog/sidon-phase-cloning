@@ -1,0 +1,328 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,array}
+\usepackage[hidelinks]{hyperref}
+\usepackage[numbers,sort&compress]{natbib}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\Sym}{\operatorname{Sym}}
+\newcommand{\ket}[1]{\lvert #1\rangle}
+\newcommand{\bra}[1]{\langle #1\rvert}
+\newcommand{\Ptor}{P_{\mathrm{tor}}}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\title{Universal Cloning Is Optimal Exactly for Designs}
+\author{Michael Weldon\\[2pt]
+\small Independent Researcher, Las Vegas, NV, USA\\
+\small ORCID: \href{https://orcid.org/0009-0001-6119-0560}{0009-0001-6119-0560}}
+\date{Version 1 --- 18 October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Werner's universal cloner turns $T$ copies of an arbitrary pure state in $\C^d$ into $T+k$ approximate copies with
+optimal global fidelity $D_T/D_{T+k}$, where $D_m=\dim\Sym^m(\C^d)$. When the input is drawn from a restricted
+ensemble, a better cloner may exist. We show that, for optimal \emph{average global} fidelity, it exists unless the
+ensemble is a design of order $T+k$: for every probability measure on pure states and all $T,k\ge1$, the
+optimal value equals $D_T/D_{T+k}$ if and only if the measure is a complex projective $(T+k)$-design. Sufficiency
+follows from known arguments; the new content is necessity, which we prove from semidefinite-programming
+complementary slackness together with a rigidity lemma for operators acting on symmetric tensors. As corollaries,
+Werner's cloner is optimal for the uniform ensemble of $n$-qubit stabilizer states exactly when $T+k\le3$ (for every
+$n$), for symmetric informationally complete ensembles exactly when $T+k\le2$, and for complete sets of mutually
+unbiased bases exactly when $T+k\le3$ in $d=2$ and $T+k\le2$ in $d\ge3$. We give exact rational certificates for
+the first strict gaps, and we contrast the result with structured state families, where matching moments is neither
+necessary nor sufficient for optimality.
+\end{abstract}
+
+\section{Introduction}
+Approximate cloning was introduced by Bu\v{z}ek and Hillery~\cite{BuzekHillery1996} and optimized for universal and
+state-dependent qubit cloners by Bru\ss\ \emph{et al.}~\cite{Bruss1998}. Werner~\cite{Werner1998} solved the universal
+case in general: from $T$ copies of an
+unknown state in $\C^d$, the best global fidelity of $T+k$ output copies is $D_T/D_{T+k}$, attained by a covariant
+channel that achieves this fidelity on every input. When the input is known to come from a restricted family, more
+can be done, and determining the optimum for structured families is an active topic: phase states and other resolving
+orbits~\cite{Herasymenko2026}, orthogonal orbits~\cite{CwiklinskiStudzinski2026}, finite sets in the asymptotic
+regime~\cite{ChiribellaYang2014}, mixed states~\cite{Fanizza2026}, and stabilizer states~\cite{Bansal2026}, for which
+Herasymenko \emph{et al.} note that the optimal cloning channel remains open~\cite{Herasymenko2026}.
+
+A natural first question for any family is whether it is easier to clone than an arbitrary state at all. For
+average global fidelity, the universal value is always achievable, so the question is when it is also optimal. It is
+known that sufficiently uniform ensembles cannot be cloned better than the universal value: Molina, Vidick and
+Watrous show this for $1\to2$ cloning of complex projective 3-designs~\cite{MVW2012}, and Kay notes the same
+3-design condition for $1\to2$ cloning~\cite{Kay2014}. In measurement-based settings, designs give exact
+characterizations: Scott characterizes the optimal measurement-based cloners~\cite[Thm.~20]{Scott2006}, and Kim
+characterizes the ensembles attaining minimal quantumness~\cite{Kim2006}.
+
+\paragraph{Result.} We prove that for coherent cloning the exact condition is a design of order $T+k$, in both
+directions (Theorem~\ref{thm:main}). At $1\to2$ this is a 2-design, sharper than the 3-design sufficient condition
+of~\cite{MVW2012}. The ``if'' direction is a short known argument; the ``only if'' direction is new as far as we can
+determine (Section~\ref{sec:discussion}). Applied to standard ensembles, it settles exactly when Werner's cloner is
+optimal for stabilizer, SIC and MUB ensembles (Corollary~\ref{cor:ensembles}), which addresses an average-global-fidelity
+version of the stabilizer question raised in~\cite{Herasymenko2026} (who measure cloning precision by trace distance):
+the universal cloner is optimal up to output order three and strictly suboptimal beyond it.
+
+\section{Setting}\label{sec:setting}
+Fix $d\ge2$, $T\ge1$, $k\ge1$, and write $n=T+k$, $D_m=\dim\Sym^m(\C^d)=\binom{d+m-1}{m}$, and $\Pi_m$ for the
+projector onto $\Sym^m(\C^d)\subseteq(\C^d)^{\otimes m}$. An \emph{ensemble} is a probability measure $\mu$ on unit
+vectors of $\C^d$ (phases are irrelevant); it may be finite with arbitrary weights, or continuous. Its $m$-th moment is
+\[
+M_m=\int(\ket\psi\!\bra\psi)^{\otimes m}\,d\mu(\psi).
+\]
+\begin{definition}
+$\mu$ is a (complex projective, weighted) $t$-design if $M_t=\Pi_t/D_t$.
+\end{definition}
+A $t$-design is an $s$-design for all $s\le t$ (take partial traces). Equivalently~\cite[Thm.~6]{Scott2006}, the
+frame potential satisfies $\iint|\langle\psi|\phi\rangle|^{2t}\,d\mu\,d\mu\ge1/D_t$, with equality if and only if $\mu$
+is a $t$-design. Note that the design condition refers to the measure $\mu$ the cloner faces, not to its support.
+
+A cloner is a channel (completely positive, trace preserving) $\Phi$ from operators on $\Sym^T(\C^d)$ to operators on
+$\Sym^n(\C^d)$. Restricting the output to $\Sym^n$ loses nothing, since the targets lie there. Its average global
+fidelity is
+\[
+F_\mu(\Phi)=\int\bra{\psi^{\otimes n}}\Phi\big(\ket{\psi^{\otimes T}}\!\bra{\psi^{\otimes T}}\big)\ket{\psi^{\otimes n}}\,d\mu(\psi),
+\qquad P_\mu(T,k)=\max_\Phi F_\mu(\Phi).
+\]
+Werner's cloner
+\[
+\Phi_U(\rho)=c\,\Pi_n(\rho\otimes I^{\otimes k})\Pi_n,\qquad c=D_T/D_n,
+\]
+is a channel and satisfies $\bra{\psi^{\otimes n}}\Phi_U(\psi^{\otimes T})\ket{\psi^{\otimes n}}=c$ for every unit
+$\psi$~\cite{Werner1998}. Hence
+\begin{equation}\label{eq:lower}
+P_\mu(T,k)\ge D_T/D_n\qquad\text{for every }\mu.
+\end{equation}
+
+\paragraph{Semidefinite program.} Fix an orthonormal basis $\{e_a\}_{a=1}^{D_T}$ of $\Sym^T(\C^d)$ and write
+$s_a(\psi)=\langle e_a|\psi^{\otimes T}\rangle$. We use the Choi operator
+$J=\sum_{a,b}\Phi(\ket{e_a}\!\bra{e_b})\otimes\ket a\!\bra b$ on $\Sym^n(\C^d)\otimes\C^{D_T}$, with the input register
+last. Then $F_\mu(\Phi)=\tr(JX)$, where
+\[
+X=\int\ket v\!\bra v\,d\mu,\qquad \ket v=\ket{\psi^{\otimes n}}\otimes\textstyle\sum_a\overline{s_a(\psi)}\ket a .
+\]
+The cloning problem is the semidefinite program
+\begin{equation}\label{eq:sdp}
+P_\mu(T,k)=\max\{\tr(JX):J\succeq0,\ \Tr_{\rm out}J=I\}=\min\{\tr Y:I\otimes Y\succeq X\},
+\end{equation}
+where strong duality and attainment hold because $J=I/D_n$ is strictly feasible (for this formulation of
+cloning as a semidefinite program see~\cite[Secs.~2--3]{MVW2012}). All transposes below refer to this
+fixed basis and convention. Werner's channel has Choi operator
+$J_U=c\sum_{a,b}\Pi_n(\ket{e_a}\!\bra{e_b}\otimes I)\Pi_n\otimes\ket a\!\bra b$.
+
+\section{Main theorem}\label{sec:main}
+\begin{theorem}\label{thm:main}
+For every ensemble $\mu$ on pure states of $\C^d$ and all $T,k\ge1$,
+\[
+P_\mu(T,k)=\frac{D_T}{D_{T+k}}\quad\Longleftrightarrow\quad \mu\text{ is a }(T+k)\text{-design}.
+\]
+\end{theorem}
+
+\begin{proof}[Proof of ``$\Leftarrow$'']
+For any channel $\Phi$ and unit $\psi$, $\ket{\psi^{\otimes T}}\!\bra{\psi^{\otimes T}}\preceq\Pi_T$ and $\Phi$ is
+positive, so $\Phi(\psi^{\otimes T})\preceq\Phi(\Pi_T)$. Integrating against $\psi^{\otimes n}$ gives
+$F_\mu(\Phi)\le\tr[M_n\Phi(\Pi_T)]=\tr\Phi(\Pi_T)/D_n=D_T/D_n$ when $M_n=\Pi_n/D_n$, using that $\Phi$ maps into
+$\Sym^n$ and preserves trace. Together with~\eqref{eq:lower} this gives equality. (For uniform finite ensembles this is
+the moment bound of~\cite[Lemma~5]{Weldon2026}; for $T=k=1$ and 3-designs it is~\cite[Prop.~4]{MVW2012}.)
+\end{proof}
+
+The converse rests on two elementary lemmas about symmetric tensors.
+
+\begin{lemma}\label{lem:A}
+Let $k\ge1$, $w\in\Sym^T(\C^d)$ and $\phi\in\C^d$ a unit vector. If $w\otimes\phi^{\otimes k}\in\Sym^{T+k}(\C^d)$, then
+$w\in\C\,\phi^{\otimes T}$.
+\end{lemma}
+\begin{proof}
+Choose an orthonormal basis with $\phi=e_1$ and expand $w=\sum w_{i_1\cdots i_T}e_{i_1}\otimes\cdots\otimes e_{i_T}$.
+The coefficient of $e_{i_1}\otimes\cdots\otimes e_{i_T}\otimes e_1^{\otimes k}$ in $w\otimes e_1^{\otimes k}$ is
+$w_{i_1\cdots i_T}$. If some $i_m\ne1$, transposing slot $m$ with the last slot maps this basis tensor to one whose
+last index is $i_m\ne1$; that coefficient is $0$ in $w\otimes e_1^{\otimes k}$. Full symmetry forces the two
+coefficients to agree, so $w_{i_1\cdots i_T}=0$ unless all indices equal $1$.
+\end{proof}
+
+\begin{lemma}\label{lem:B}
+Let $Z$ be a Hermitian operator on $\Sym^T(\C^d)$ such that every $\phi^{\otimes T}$ ($\phi$ a unit vector) is an
+eigenvector of $Z$. Then $Z$ is a multiple of $\Pi_T$.
+\end{lemma}
+\begin{proof}
+Let $Z\phi^{\otimes T}=\lambda(\phi)\phi^{\otimes T}$. Eigenvectors of a Hermitian operator with distinct eigenvalues
+are orthogonal, and $\langle\phi^{\otimes T}|\chi^{\otimes T}\rangle=\langle\phi|\chi\rangle^T$. For unit vectors
+$\phi,\chi$, pick a unit $\eta$ with $\langle\phi|\eta\rangle\ne0\ne\langle\chi|\eta\rangle$; then
+$\lambda(\phi)=\lambda(\eta)=\lambda(\chi)$. So $\lambda$ is constant, and since the vectors $\phi^{\otimes T}$ span
+$\Sym^T(\C^d)$, $Z=\lambda\Pi_T$.
+\end{proof}
+
+\begin{proof}[Proof of ``$\Rightarrow$'' in Theorem~\ref{thm:main}]
+Assume $P_\mu(T,k)=c=D_T/D_n$. By~\eqref{eq:lower} Werner's channel is optimal, so $J_U$ is an optimal primal point.
+Let $Y$ be an optimal dual point; $\tr Y=c$ and $Y=Y^\dagger$. Since $\tr[(I\otimes Y-X)J_U]=\tr Y-c=0$ and both
+factors are positive semidefinite,
+\begin{equation}\label{eq:cs}
+(I\otimes Y-X)\,J_U=0 .
+\end{equation}
+
+\emph{Step 1: evaluating~\eqref{eq:cs}.} Define the operator $Z=\sum_{a,b}Y_{ba}\ket{e_a}\!\bra{e_b}$ on $\Sym^T(\C^d)$
+(the transpose of $Y$ in the basis $\{e_a\}$); it is Hermitian and $\Pi_TZ=Z\Pi_T=Z$. Since
+$\sum_aY_{a'a}\ket{e_a}=Z\ket{e_{a'}}$,
+\[
+(I\otimes Y)J_U=c\sum_{a,b}\Pi_n(Z\otimes I)(\ket{e_a}\!\bra{e_b}\otimes I)\Pi_n\otimes\ket a\!\bra b .
+\]
+For the second term, $\bra{\psi^{\otimes n}}\Pi_n=\bra{\psi^{\otimes n}}$ and $\sum_a s_a\overline{s_a}=1$ give
+$\bra vJ_U=c\sum_b(\bra{e_b}\otimes\bra{\psi^{\otimes k}})\Pi_n\otimes\bra b$, and
+$\int\overline{s_a}\,\ket{\psi^{\otimes n}}\bra{\psi^{\otimes k}}\,d\mu=M_n(\ket{e_a}\otimes I)$, so
+\[
+XJ_U=c\sum_{a,b}M_n(\ket{e_a}\!\bra{e_b}\otimes I)\Pi_n\otimes\ket a\!\bra b .
+\]
+Hence~\eqref{eq:cs} is equivalent to
+$\big[\Pi_n(Z\otimes I)-M_n\big](\ket{e_a}\!\bra{e_b}\otimes I)\Pi_n=0$ for all $a,b$.
+
+\emph{Step 2: a one-sided operator identity.} The ranges of $(\bra{e_b}\otimes I)\Pi_n$, $b=1,\dots,D_T$, lie in
+$\Sym^k(\C^d)$ and span it: applied to $\psi^{\otimes n}$ they give $s_b(\psi)\,\psi^{\otimes k}$, and some
+$s_b(\psi)\ne0$. With $Q=\Pi_T\otimes\Pi_k$, Step~1 is therefore equivalent to
+\[
+\Pi_n(Z\otimes\Pi_k)\,Q=M_n\,Q .
+\]
+Take adjoints. We have $Z^\dagger=Z$, $Q(Z\otimes\Pi_k)=Z\otimes\Pi_k$ (as $\Pi_TZ=Z$), $Q\Pi_n=\Pi_n$ and
+$QM_n=M_n$ (as $\Sym^n\subseteq\Sym^T\otimes\Sym^k$ and $M_n$ is supported on $\Sym^n$). Therefore
+\begin{equation}\label{eq:onesided}
+(Z\otimes\Pi_k)\,\Pi_n=M_n .
+\end{equation}
+
+\emph{Step 3: rigidity.} Apply~\eqref{eq:onesided} to $\phi^{\otimes n}$ for an arbitrary unit vector $\phi$:
+$(Z\phi^{\otimes T})\otimes\phi^{\otimes k}=M_n\phi^{\otimes n}\in\Sym^n(\C^d)$. By Lemma~\ref{lem:A},
+$Z\phi^{\otimes T}\in\C\phi^{\otimes T}$ for every $\phi$, and by Lemma~\ref{lem:B}, $Z=\lambda\Pi_T$.
+
+\emph{Step 4: normalization.} $\lambda D_T=\tr Z=\tr Y=c$, so $\lambda=1/D_n$, and~\eqref{eq:onesided} gives
+$M_n=\lambda(\Pi_T\otimes\Pi_k)\Pi_n=\Pi_n/D_n$.
+\end{proof}
+
+\begin{remark}\label{rem:scope}
+(i) The proof uses neither finiteness nor uniform weights, and it does not use Werner's uniqueness theorem; it uses
+only that Werner's channel attains $c$ on every pure state. (ii) The hypothesis $k\ge1$ is necessary: for $k=0$ the
+identity channel has fidelity $1$ for every ensemble. (iii) The statement concerns \emph{average global} fidelity.
+For worst-case global fidelity the ``if'' direction persists (the worst-case optimum lies between $c$ and the average
+optimum), but we make no claim about necessity. For single-copy (local) fidelity the picture differs: for a
+continuous orthogonal orbit that forms a 2-design, the averaged $1\to2$ local-fidelity problem coincides with
+universal cloning~\cite{CwiklinskiStudzinski2026}, and three equatorial qubit states reproduce phase-covariant
+single-copy cloning~\cite{Jing2012}. (iv) The output order $T+k$ is sharp: the
+objective $X$ depends on the moment $M_{2T+k}$, yet only $M_{T+k}$ decides equality with the universal value.
+\end{remark}
+
+\section{Consequences for standard ensembles}\label{sec:cor}
+\begin{corollary}\label{cor:ensembles}
+Werner's universal cloner is optimal for average global fidelity, i.e.\ $P_\mu(T,k)=D_T/D_{T+k}$, exactly in the
+following cases.
+\begin{enumerate}
+\item[(a)] $\mu$ uniform on all $n$-qubit stabilizer states, any $n\ge1$: if and only if $T+k\le3$.
+\item[(b)] $\mu$ uniform on a SIC (symmetric informationally complete set of $d^2$ states) in any $d\ge2$: if and only if
+$T+k\le2$.
+\item[(c)] $\mu$ uniform on a complete set of $d+1$ mutually unbiased bases: if and only if $T+k\le3$ when $d=2$, and
+$T+k\le2$ when $d\ge3$.
+\end{enumerate}
+\end{corollary}
+\begin{proof}
+By Theorem~\ref{thm:main} it suffices to know the largest $t$ for which each ensemble is a $t$-design.
+(a) Uniform stabilizer states form a 3-design and not a 4-design for every number of qubits~\cite{KuengGross2015}.
+(b) SICs are 2-designs~\cite{Renes2004}. With overlaps $|\langle\psi|\phi\rangle|^2=1/(d+1)$ between distinct elements,
+the order-3 frame potential is $\big(1+(d^2-1)(d+1)^{-3}\big)/d^2=(d+3)/(d(d+1)^2)$, which exceeds
+$1/D_3=6/(d(d+1)(d+2))$ for every $d\ge2$ (the difference has the sign of $d^2-d$). So no SIC is a 3-design.
+(c) Complete sets of MUBs are 2-designs~\cite{KlappeneckerRoetteler2005}. With overlaps $0$ within a basis and $1/d$
+across bases, the order-$t$ frame potential is $\big(1+d^2\,d^{-t}\big)/(d(d+1))$. For $t=3$ this is $1/d^2$, equal to
+$6/(d(d+1)(d+2))$ only for $d=2$. So the set is a 3-design exactly when $d=2$, where it is the octahedron of six
+Pauli eigenstates; its order-4 frame potential $5/24$ exceeds $1/D_4=1/5$, so it is not a 4-design.
+In each case the stated threshold is the design order.
+\end{proof}
+
+\paragraph{Exact gaps.} Table~\ref{tab:cert} lists the first strict gaps. Each value is certified in exact
+Gaussian-rational arithmetic by a scalar dual $Y=\lambda I$ (positive semidefiniteness of $I\otimes Y-X$ verified by an
+exact $LDL^\dagger$ factorization) and a matching primal Choi operator (an exact projector onto the corresponding
+eigenspace, rescaled, with $\Tr_{\rm out}J=I$ verified exactly), so primal and dual values coincide.
+
+\begin{table}[ht]
+\centering\small
+\caption{Optimal average global fidelity versus the universal value. ``Exact'': rational primal and dual
+certificates; [Num]: floating-point semidefinite programming, not certified.}\label{tab:cert}
+\begin{tabular}{@{}lccccl@{}}\toprule
+Ensemble & design order & task & $P_\mu$ & $D_T/D_{T+k}$ & status\\\midrule
+octahedron ($d=2$) & 3 & $1\to2,\,1\to3$ & $2/3,\ 1/2$ & $2/3,\ 1/2$ & exact\\
+octahedron ($d=2$) & 3 & $1\to4$ & $5/12$ & $2/5$ & exact\\
+complete MUBs ($d=4$) & 2 & $1\to2$ & $2/5$ & $2/5$ & exact\\
+complete MUBs ($d=4$) & 2 & $1\to3$ & $1/4$ & $1/5$ & exact\\
+2-qubit stabilizer states (60) & 3 & $1\to4$ & $1/8$ & $4/35$ & exact\\
+complete MUBs ($d=3$) & 2 & $1\to3$ & $0.333333$ & $3/10$ & [Num]\\
+qubit SIC (tetrahedron) & 2 & $1\to3$ & $0.555556$ & $1/2$ & [Num]\\\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Structured families: a contrast}\label{sec:contrast}
+Theorem~\ref{thm:main} compares an ensemble with the \emph{universal} benchmark. A different question compares a
+finite ensemble with the continuous family it is drawn from, for example a finite set of phase states with the full
+torus of phase states, whose optimal cloning value $\Ptor$ was determined in~\cite[Thm.~II.3, Eq.~(16)]{Herasymenko2026}. There the
+relation between moments and cloning is different, as shown in~\cite{Weldon2026}:
+
+\begin{center}\small
+\begin{tabular}{@{}p{0.42\linewidth}p{0.33\linewidth}p{0.17\linewidth}@{}}\toprule
+Comparison & Matching the $(T+k)$-th moment & Reference\\\midrule
+ensemble vs.\ universal value ($U(d)$) & necessary and sufficient & Theorem~\ref{thm:main}\\
+finite phase codebook vs.\ torus value $\Ptor$ & sufficient in the proved cases; not necessary & \cite[Thm.~9, \S5.4]{Weldon2026}\\
+finite orbit vs.\ continuous orbit of a subgroup $H\subsetneq U(d)$ & not sufficient in general & \cite[Thm.~31]{Weldon2026}\\\bottomrule
+\end{tabular}
+\end{center}
+
+For phase codebooks, a key set $K\subset\mathbb Z_q$ that is $B_{T+k}$ (all $(T+k)$-fold sums distinct) reaches
+$\Ptor$ in the proved cases, yet at $T=1$ there are key sets reaching $\Ptor$ without being $B_{1+k}$, for example
+$\{0,1,13\}\subset\mathbb Z_{39}$ at $1\to3$~\cite[\S5.4]{Weldon2026}. For orbits of subgroups such as $SU(3)$ on
+$\Sym^2\C^3$ and $SU(2)$ on spin~$1$, finite orbits matching the continuous orbit's moment can still be strictly
+easier to clone~\cite[Thm.~31]{Weldon2026}. The proof of Theorem~\ref{thm:main} uses the full unitary group in an
+essential way: it tests the identity~\eqref{eq:onesided} on \emph{every} coherent tensor power $\phi^{\otimes n}$, which
+is possible because the universal cloner is built from the full symmetric projector.
+
+\section{Discussion}\label{sec:discussion}
+\paragraph{Relation to prior work.} The universal value and its uniqueness are due to Werner~\cite[Sec.~4]{Werner1998}.
+Sufficiency of designs appears in different forms in~\cite{MVW2012,Kay2014}; in particular, Molina, Vidick and Watrous
+observe that the four-state qubit SIC already attains $2/3$ for $1\to2$ cloning~\cite{MVW2012}, consistent with
+Theorem~\ref{thm:main} since it is a 2-design. Numerical and semidefinite-programming approaches to cloning are
+standard~\cite{Koniorczyk2013}. In measurement-based settings, Scott characterizes the optimal measurement-based
+cloners~\cite[Thm.~20]{Scott2006} and Kim characterizes the ensembles of minimal quantumness~\cite{Kim2006};
+Theorem~\ref{thm:main} is a coherent analogue, with a different objective and an unrestricted channel class. Searches of the literature (preprint servers
+and two independent literature-search tools) did not locate a statement or proof of the necessity direction for
+cloning; we would be grateful to learn of one.
+
+\paragraph{What remains open.} Theorem~\ref{thm:main} decides when the universal value is optimal, not the optimum
+itself. For stabilizer states it shows that, for average global fidelity, the universal cloner stops being optimal exactly
+at output order four. The optimal channel beyond that point, the trace-distance formulation of~\cite{Herasymenko2026},
+and the relation of the strict fidelity gap to the sample-complexity results of~\cite{Bansal2026} remain open. Two further questions are whether a quantitative version holds (a gap $P_\mu-D_T/D_{T+k}$
+bounded below by a distance of $M_{T+k}$ from $\Pi/D_{T+k}$), and what the analogue is for worst-case fidelity.
+
+\section*{Use of AI tools}
+This work used several AI systems; the author directed the work and takes full responsibility for its content.
+\textbf{Grok Bot} (xAI's agent platform, launched on the Grok~4.6 model) proposed the theorem and its proof and
+produced the exact certificates. \textbf{ChatGPT} (OpenAI; GPT-6 Luna, the ChatGPT Free model) independently checked the proof line by line and
+reviewed the draft.
+\textbf{Perplexity} (Perplexity Pro with the GPT-6.1 Sol model) and \textbf{Consensus} carried out independent
+prior-art searches; Perplexity also audited the citations. \textbf{Claude} (Anthropic; Claude Opus 5.5) audited the proof, reproduced the exact certificates
+with independently generated state sets, verified every reference against arXiv or Crossref, and drafted the
+manuscript.
+
+\section*{Data and code availability}
+The certificate scripts and their outputs (\texttt{paper2\_certificates.zip}, with a README and SHA-256 checksums) are
+deposited with this note in the same Zenodo record, and in the folder \texttt{paper2/} of the repository
+\url{https://github.com/Weldog/sidon-phase-cloning}. Verification requires Python $\ge3.10$ and \texttt{numpy}.
+
+\section*{Author contributions and competing interests}
+M.~Weldon is the sole author. He conceived and directed the project, read and approved the manuscript, and takes
+responsibility for its content, with AI assistance as described above. The author declares no competing interests.
+This work received no external funding.
+
+\bibliographystyle{unsrtnat}
+\bibliography{refs2}
+\end{document}
