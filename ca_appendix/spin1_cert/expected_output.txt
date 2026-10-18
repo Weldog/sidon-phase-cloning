@@ -1,0 +1,4 @@
+group_ok True | commutant_dim_O(Sym2)=3 True | quadrature_weights_sum_1 True
+P_X_lower [0.516520734117692 +/- 1.88e-16] | P_H_upper [0.515877019737336 +/- 2.68e-16] | cholesky_ok True | min_pivot [1.756e-12 +/- 3.32e-16]
+M2_residual_at_f_q <= 2.673e-17 | c(f-) [-7.93751e-14 +/- 4.21e-20] | c(f+) [7.92287e-14 +/- 4.71e-20] | sign_change True
+gap_lower [0.000643714380356 +/- 8.01e-17] | matching_loss_upper [7.20000e-12 +/- 1e-22] | PASS True

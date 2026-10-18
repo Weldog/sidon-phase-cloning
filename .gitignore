@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.aux
+*.log
+!qh-lab/run.log
+*.out
+*.bbl
+*.blg

@@ -1,0 +1,4 @@
+group_216_distinct True | commutant_dim_G(Sym2V) [4.0000000 +/- 3e-12] True | projector_traces True
+P_X_lower [0.337120954689742 +/- 2.07e-16] | P_H_upper [0.336316958769320 +/- 6.52e-17] | gershgorin [1.000e-10 +/- 3.22e-16] [1.000 +/- 3e-9] True
+injectivity_det [-0.000360512 +/- 3.61e-12] True | PM face signs s+,s-,t+,t- 1 -1 1 -1 True
+gap_lower [0.000803995920422 +/- 1.42e-16] | matching_loss_upper [8.14587e-10 +/- 1.20e-17] | PASS True

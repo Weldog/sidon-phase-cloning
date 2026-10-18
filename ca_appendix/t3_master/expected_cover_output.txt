@@ -1,0 +1,20 @@
+residual (d,k)=(3,1): certificate True, verified bound 0.771752347
+residual (d,k)=(4,1): certificate True, verified bound 0.6822155247
+residual (d,k)=(4,2): certificate True, verified bound 0.6734475378
+residual (d,k)=(5,1): certificate True, verified bound 0.6384047257
+residual (d,k)=(5,2): certificate True, verified bound 0.5723188439
+residual (d,k)=(6,1): certificate True, verified bound 0.6117793329
+residual (d,k)=(6,2): certificate True, verified bound 0.515782309
+residual (d,k)=(6,3): certificate True, verified bound 0.5152868379
+residual (d,k)=(7,1): certificate True, verified bound 0.593785219
+residual (d,k)=(7,2): certificate True, verified bound 0.4805341924
+residual (d,k)=(7,3): certificate True, verified bound 0.4582062011
+residual (d,k)=(8,1): certificate True, verified bound 0.5807916101
+residual (d,k)=(8,3): certificate True, verified bound 0.4203827535
+residual (d,k)=(8,4): certificate True, verified bound 0.4196416334
+residual (d,k)=(9,5): certificate True, verified bound 0.3894328011
+residual (d,k)=(10,6): certificate True, verified bound 0.3641409567
+residual (d,k)=(11,7): certificate True, verified bound 0.3423336157
+residual (d,k)=(12,8): certificate True, verified bound 0.3232047327
+residual pairs: 18 ; max verified LP bound on them: 0.7717523470
+THEOREM T3 (all d>=3, k>=1) COMPUTATIONAL STEPS: PASS

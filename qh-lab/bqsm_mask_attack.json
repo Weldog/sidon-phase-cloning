@@ -1,0 +1,98 @@
+[
+ {
+  "d": 8,
+  "L": 10,
+  "T": 2,
+  "quantum_memory_qubits": 0,
+  "success": 0.015,
+  "holevo_min_copies": 3.3333333333333335
+ },
+ {
+  "d": 8,
+  "L": 10,
+  "T": 4,
+  "quantum_memory_qubits": 0,
+  "success": 0.03,
+  "holevo_min_copies": 3.3333333333333335
+ },
+ {
+  "d": 8,
+  "L": 10,
+  "T": 8,
+  "quantum_memory_qubits": 0,
+  "success": 0.19,
+  "holevo_min_copies": 3.3333333333333335
+ },
+ {
+  "d": 8,
+  "L": 10,
+  "T": 16,
+  "quantum_memory_qubits": 0,
+  "success": 0.425,
+  "holevo_min_copies": 3.3333333333333335
+ },
+ {
+  "d": 8,
+  "L": 10,
+  "T": 32,
+  "quantum_memory_qubits": 0,
+  "success": 0.8,
+  "holevo_min_copies": 3.3333333333333335
+ },
+ {
+  "d": 8,
+  "L": 10,
+  "T": 64,
+  "quantum_memory_qubits": 0,
+  "success": 0.975,
+  "holevo_min_copies": 3.3333333333333335
+ },
+ {
+  "d": 16,
+  "L": 12,
+  "T": 2,
+  "quantum_memory_qubits": 0,
+  "success": 0.005,
+  "holevo_min_copies": 3.0
+ },
+ {
+  "d": 16,
+  "L": 12,
+  "T": 4,
+  "quantum_memory_qubits": 0,
+  "success": 0.02,
+  "holevo_min_copies": 3.0
+ },
+ {
+  "d": 16,
+  "L": 12,
+  "T": 8,
+  "quantum_memory_qubits": 0,
+  "success": 0.09,
+  "holevo_min_copies": 3.0
+ },
+ {
+  "d": 16,
+  "L": 12,
+  "T": 16,
+  "quantum_memory_qubits": 0,
+  "success": 0.445,
+  "holevo_min_copies": 3.0
+ },
+ {
+  "d": 16,
+  "L": 12,
+  "T": 32,
+  "quantum_memory_qubits": 0,
+  "success": 0.88,
+  "holevo_min_copies": 3.0
+ },
+ {
+  "d": 16,
+  "L": 12,
+  "T": 64,
+  "quantum_memory_qubits": 0,
+  "success": 1.0,
+  "holevo_min_copies": 3.0
+ }
+]

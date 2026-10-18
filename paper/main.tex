@@ -1,0 +1,1608 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,array}
+\usepackage{xcolor}
+\usepackage{fancyvrb}
+\usepackage[hidelinks]{hyperref}
+\usepackage[numbers,sort&compress]{natbib}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\mult}{\operatorname{mult}}
+\newcommand{\Sym}{\operatorname{Sym}}
+\newcommand{\Ptor}{P_{\mathrm{tor}}}
+\newcommand{\ket}[1]{\lvert #1\rangle}
+\newcommand{\bra}[1]{\langle #1\rvert}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\title{Sidon Sets, Additive Energy, and the Optimal Cloning\\ of Finite Phase-State Codebooks}
+\author{Michael Weldon\\[2pt]
+\small Independent Researcher, Las Vegas, NV, USA\\
+\small ORCID: \href{https://orcid.org/0009-0001-6119-0560}{0009-0001-6119-0560}}
+\date{Version 2 --- 18 October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Phase states $\ket{\psi_x}=d^{-1/2}\sum_{j}\omega^{x k_j}\ket{j}$, indexed by $x\in\Z_q$ and a key set
+$K=\{k_1,\dots,k_d\}\subset\Z_q$, are the state family behind quantum fingerprinting and quantum hashing.
+We ask how well an adversary holding $T$ copies of $\ket{\psi_x}$ can produce $T+k$ copies, and when a
+\emph{finite} codebook is exactly as hard to clone as the continuous family of all phase states (the torus),
+whose optimal cloning fidelity was recently determined. The answer is governed by additive combinatorics of $K$.
+(i) The optimal $1\to2$ global cloning fidelity equals $(2d-1)/d^2$ if and only if $K$ is a Sidon set.
+(ii) A $B_{T+k}$ key set attains the torus optimum: analytically for $d=2$ (all $T$) and for $T=1$ (all $d,k$), and for
+$T=2,3$ (all $d,k$) by a proof whose finitely many computational steps are verified by standalone exact and
+interval-arithmetic checkers; we conjecture it for all $T$. (iii) For $T=1$ we characterise exactly, for every $k$, the key
+sets that attain the torus optimum; the $B_{1+k}$ condition is sufficient but not necessary. (iv) The optimal fidelity of
+fusing $m$ phase states into the state of their sum equals $E_m(K)/d^{m+1}$, where $E_m$ is the higher additive energy;
+Sidon sets minimise it for every $m$. Small Fourier bias, the standard design criterion for quantum hashing, does not
+control cloning. For finite orbits of non-abelian groups we prove a window theorem giving a dual-feasibility criterion, an
+obstruction, and a representation-theoretic selection rule for when matching the $(T+k)$-th moment suffices, and we give
+certified counterexamples for $SU(3)$ and $SU(2)$ showing that moment matching alone does not.
+\end{abstract}
+\noindent\textbf{Keywords:} quantum cloning, phase states, quantum hashing, Sidon sets, $B_h$ sets, additive energy.\\
+\textbf{MSC2020:} 81P45 (primary); 11B13, 05B10 (secondary).
+
+\section{Introduction}
+Quantum fingerprints~\cite{Buhrman2001} and quantum hash functions~\cite{AblayevVasiliev2014,Vasiliev2016,Ziiatdinov2016,Ablayev2025}
+map a classical string $x$ to a short quantum state. In the phase form, $x\in\Z_q$ is encoded as
+\begin{equation}\label{eq:phase}
+\ket{\psi_x}=\frac{1}{\sqrt d}\sum_{j=1}^{d}\omega^{x k_j}\ket{j},\qquad \omega=e^{2\pi i/q},\qquad K=\{k_1,\dots,k_d\}\subset\Z_q .
+\end{equation}
+The standard design criterion is that $K$ be $\varepsilon$-biased, which bounds the overlaps
+$|\langle\psi_x|\psi_y\rangle|$ and hence collision resistance~\cite{Vasiliev2016,Ablayev2025}.
+When such states serve as quantum public keys or tokens~\cite{GottesmanChuang2001}, a second property matters:
+how well can an adversary holding $T$ copies \emph{counterfeit} $T+k$ copies?
+
+For the continuous family of all phase states, $\ket{\psi_\theta}=d^{-1/2}\sum_j e^{i\theta_j}\ket{j}$ with
+$\theta$ uniform on the torus, the optimal $T\to T+k$ cloning fidelity is known: special cases go back to
+phase-covariant cloning~\cite{Buscemi2005,KimChitambar2022}, and the general value was recently obtained by
+Herasymenko, Lin, Verduyn Lunel and Grinko~\cite{Herasymenko2026}. A finite codebook is a subset of the torus, so it can
+only be easier to clone. The question we answer is \emph{when it is exactly as hard}.
+
+\paragraph{Results.}
+\begin{itemize}
+\item \textbf{Reduced dual (Lemma~\ref{lem:R}).} For every $K$ and $(T,k)$ the counterfeiting SDP reduces to a
+small convex program in the representation counts of $K$.
+\item \textbf{Sidon theorem (Theorem~\ref{thm:sidon}).} $P_K(1\to2)=(2d-1)/d^2$ if and only if $K$ is Sidon.
+\item \textbf{Torus theorem (Theorem~\ref{thm:torus}).} For a $B_{T+k}$ key set, $P_K(T\to T+k)=\Ptor$ in the proved cases
+$d=2$ (all $T$) and $T\le3$ (all $d,k$); conjectured in general (Conjecture~\ref{conj:TT}), with exact certificates on the
+finite boxes listed after the conjecture.
+\item \textbf{Fusion theorem (Theorem~\ref{thm:fusion}).} The optimal fusion fidelity is the additive energy $E_q(K)/d^3$.
+\item \textbf{Exact characterisation at $T=1$ (Theorem~\ref{thm:t1iff}).} For every $k$, $P_K(1,k)=\Ptor$ if and only if no additive class
+of $K$ carries more weight than the torus maximum. $B_{1+k}$ is sufficient but not necessary: Sidon sets that are not $B_3$ can attain the torus
+value (Section~\ref{sec:t1iff}).
+\item \textbf{Multi-fold fusion (Theorem~\ref{thm:fusionm}).} The optimal fidelity of fusing $m$ phase states is the higher energy $E_m(K)/d^{m+1}$;
+Sidon sets minimise it for every $m$.
+\item \textbf{Negative results.} Small bias does not imply counterfeit resistance; the Sidon sets in our tables that are not $B_3$ fail at $T+k=3$,
+and arithmetic progressions are worst in most cases tested (Section~\ref{sec:neg}).
+\item \textbf{Non-abelian orbits (Section~\ref{sec:nonab}).} A window theorem for finite orbits $X=G\cdot f\subset H\cdot f$,
+and certified counterexamples ($SU(3)$ on $\Sym^2\C^3$; $SU(2)$ spin 1) to the naive moment-matching principle.
+\end{itemize}
+The torus values themselves are not new: they are given in full by~\cite{Herasymenko2026}, with special cases
+in~\cite{Buscemi2005,KimChitambar2022}. What is new is the exact characterisation of the \emph{finite} codebooks that attain them, the
+additive-energy form of optimal fusion, and the failure of the corresponding moment-matching principle for finite orbits of
+non-abelian groups. Section~\ref{sec:related} discusses prior work in detail.
+
+\section{Setting and notation}\label{sec:setting}
+Throughout, $K=(k_1,\dots,k_d)$ consists of $d\ge2$ distinct elements of $\Z_q$, and $x\in\Z_q$ is uniform.
+
+\begin{definition}[Counterfeiting value]
+For $T\ge1$, $k\ge1$,
+\[
+P_K(T,k)=\max_{\Phi}\ \E_{x\in\Z_q}\,\bra{\psi_x^{\otimes(T+k)}}\,\Phi\big(\psi_x^{\otimes T}\big)\,\ket{\psi_x^{\otimes(T+k)}},
+\]
+the maximum over quantum channels (CPTP maps) $\Phi$ from $\Sym^T(\C^d)$ to $\Sym^{T+k}(\C^d)$; this is the
+average \emph{global} fidelity with the ideal output $\psi_x^{\otimes(T+k)}$. The torus value $\Ptor(d;T,k)$ is the same
+quantity for $\ket{\psi_\theta}=d^{-1/2}\sum_je^{i\theta_j}\ket j$ with $\theta$ uniform on $[0,2\pi)^d$. Twirling any channel over
+the phase group $\theta\mapsto\theta+\phi$ preserves the average fidelity and produces a covariant channel, whose fidelity is the
+same on every phase state; hence the optimal average equals the optimal worst-case fidelity $F^\star_{\rm ph}(d,T,k)$
+of~\cite[Thm.~II.3; formal statement Thm.~X.1, Eq.~(16)]{Herasymenko2026}.
+\end{definition}
+
+\begin{definition}[$B_h$ sets, representation counts, additive energy]
+$K$ is a $B_h$ set (mod $q$) if any two distinct \emph{multisets} of size $h$ drawn from $K$ (repetition allowed, order
+ignored) have distinct sums mod $q$; $B_2$ sets are \emph{Sidon} sets~\cite{ErdosTuran1941,OBryant2004}. A $B_h$ set is $B_{h'}$
+for every $h'\le h$ (add the same $h-h'$ elements to both multisets). By contrast, the counts $r_m$ below are over \emph{ordered}
+tuples. The ordered representation count is
+$r_m(v)=\#\{(j_1,\dots,j_m)\in[d]^m:\sum_i k_{j_i}\equiv v\}$, and the additive energy is
+$E_q(K)=\#\{(a,b,c,e)\in K^4:a+e\equiv b+c \pmod q\}$.
+\end{definition}
+
+We write $D_m=\binom{d+m-1}{m}=\dim\Sym^m(\C^d)$ and $W(d,T,k)=D_T/D_{T+k}$, Werner's optimal universal cloning
+fidelity~\cite{Werner1998}. For multi-indices $\gamma\in\Z_{\ge0}^d$, $\mult(\gamma)=|\gamma|!/\prod_i\gamma_i!$.
+
+\section{The reduced dual}\label{sec:dual}
+The counterfeiting SDP has dual $P_K(T,k)=\min\{\tr Y : Y\otimes I\succeq X\}$, with
+$X=\E_x \bar\psi_x^{\otimes T}\otimes\psi_x^{\otimes (T+k)}$ restricted to $\Sym^T\otimes\Sym^{T+k}$.
+
+\begin{lemma}[Reduced dual]\label{lem:R}
+For every $K$ and $(T,k)$,
+\[
+P_K(T,k)=\min_{z\in(0,\infty)^{\mathrm{supp}\,r_T}}\ \sum_{w\in\mathrm{supp}\,r_T}\frac{r_T(w)}{z_w}\quad\text{s.t.}\quad d^{-(2T+k)}\sum_{w} r_{T+k}(s+w)\,z_w\le1\qquad\forall s\in\Z_q ,
+\]
+the sums running over $w\in\mathrm{supp}\,r_T$; the minimum is attained.
+\end{lemma}
+\begin{proof}[Proof sketch; full proof in Appendix~\ref{app:lemR}]
+In occupation bases $\ket\alpha$ ($|\alpha|=T$) and $\ket\beta$ ($|\beta|=T+k$), with $c_\gamma=\sqrt{\mult(\gamma)}$,
+averaging over $x$ gives $X=\sum_{s\in\Z_q}\ket{w_s}\bra{w_s}$ with
+$w_s=d^{-(2T+k)/2}\sum_{K\cdot(\beta-\alpha)\equiv s}c_\alpha c_\beta\ket{\alpha,\beta}$. $X$ and the constraint are
+invariant under $\bar U_x^{\otimes T}\otimes U_x^{\otimes(T+k)}$, $U_x=\mathrm{diag}(\omega^{xk_j})$, so an optimal $Y$
+may be taken block diagonal over the classes $\{\alpha:K\cdot\alpha\equiv w\}$. Within sector $s$, $Y\otimes I\succeq X$
+holds iff $\sum_{(\beta,w)}c_\beta^2 d^{-(2T+k)}v_w^\dagger Y_w^{-1}v_w\le1$ with $v_w(\alpha)=c_\alpha$. For fixed
+$g_w=v_w^\dagger Y_w^{-1}v_w$, Cauchy--Schwarz gives $\tr Y_w\ge\lVert v_w\rVert^2/g_w=r_T(w)/g_w$, attained by a rank-one
+$Y_w$; put $z_w=g_w$ and use $\sum_{K\cdot\beta\equiv v}c_\beta^2=r_{T+k}(v)$. Strong duality holds by Slater.
+\end{proof}
+
+\begin{lemma}\label{lem:lower}
+For every $K$, $P_K(T,k)\ge\Ptor(d;T,k)$.
+\end{lemma}
+\begin{proof}
+The optimal torus cloner of~\cite{Herasymenko2026} is covariant and achieves fidelity $\Ptor$ on every phase state, in
+particular on every $\ket{\psi_x}$.
+\end{proof}
+
+\begin{lemma}[Moment bound]\label{lem:B}
+For any finite ensemble $\{\psi_x\}$, $P\le \dim\big(\mathrm{span}\{\psi_x^{\otimes T}\}\big)\,\lambda_{\max}\big(\E_x\psi_x^{\otimes(T+k)}\big)$.
+\end{lemma}
+\begin{proof}
+$\bar\psi^{\otimes T}\preceq\Pi_V$ on the span $V$ of the inputs, so $X\preceq\Pi_V\otimes M$ with
+$M=\E\psi^{\otimes(T+k)}$, and $\tr(JX)\le\lambda_{\max}(M)\tr\big((\Pi_V\otimes I)J\big)=\lambda_{\max}(M)\dim V$ for every Choi
+operator $J$ with $\tr_{\rm out}J=I$.
+\end{proof}
+
+\begin{proposition}[Near-optimality of $B_{T+k}$ codebooks, all $T$]\label{prop:nearW}
+If $K$ is $B_{T+k}$ and $d\ge T+k$, then
+$\Ptor\le P_K(T,k)\le W(d,T,k)\prod_{i=0}^{T+k-1}\big(1+\tfrac id\big)$.
+\end{proposition}
+\begin{proof}
+Under $B_{T+k}$, $\E_x\psi_x^{\otimes(T+k)}$ is diagonal in the occupation basis with entries $\mult(\beta)/d^{T+k}$, whose
+maximum is $(T+k)!/d^{T+k}$ for $d\ge T+k$. Apply Lemma~\ref{lem:B} with $\dim V\le D_T$ and use $D_m=\prod_{i<m}(d+i)/m!$.
+\end{proof}
+
+\section{The Sidon theorem}\label{sec:sidon}
+\begin{theorem}\label{thm:sidon}
+For every $K\subset\Z_q$ with $|K|=d\ge2$, $P_K(1,1)=\dfrac{2d-1}{d^2}$ if and only if $K$ is a Sidon set; otherwise
+$P_K(1,1)>(2d-1)/d^2$.
+\end{theorem}
+\begin{proof}
+\emph{Primal.} The channel with Kraus operators $A_j\ket a=\sqrt{(2-\delta_{aj})/(2d-1)}\,\ket{e_a+e_j}_{\Sym^2}$, $j\in[d]$, is
+trace preserving and has fidelity $(2d-1)/d^2$ on every phase state, so $P_K(1,1)\ge(2d-1)/d^2$ for all $K$.
+
+\emph{Dual.} In Lemma~\ref{lem:R} with $T=k=1$, take $z_a\equiv d^3/(2d-1)$ (i.e.\ $Y=\frac{2d-1}{d^3}I$, trace $(2d-1)/d^2$). Torus
+sectors are indexed by charges $c=\beta-\alpha$. Type-1 charges $c=e_j$ have weight $\sum_a d^{-3}(2-\delta_{aj})=(2d-1)/d^3$ and
+are tight; type-2 charges $c=e_b+e_{b'}-e_a$ ($a\notin\{b,b'\}$) have value $(2-\delta_{bb'})/(2d-1)$. For a Sidon set, a type-1
+sector merges with nothing (two type-1 charges merge only if $k_i\equiv k_j$; type 1 with type 2 only through a non-trivial
+relation $k_j+k_a\equiv k_b+k_{b'}$). In a merged class of type-2 charges, Sidon makes the representation $s+k_a\equiv k_b+k_{b'}$
+unique for each $a$, so the class value is at most $\sum_a(2-\delta_{b_ab'_a})/(2d-1)$, which can exceed 1 only if all $d$ edges
+$E_a=\{b_a,b'_a\}$ avoid $a$. If two such edges share a vertex, $E_a=\{u,v\}$, $E_{a'}=\{u,w\}$, subtracting gives
+$k_a+k_w\equiv k_{a'}+k_v$, and Sidon forces $a=v\in E_a$, a contradiction; hence the $d$ edges are pairwise disjoint on
+$d$ vertices, which is impossible. So $Y$ is feasible.
+
+\emph{Only if.} We use the Lagrangian lower bound for the convex program of Lemma~\ref{lem:R}. With $T=k=1$ and distinct keys,
+$r_1(w)=1$ for $w\in K$, so $P_K(1,1)=\min_{z>0}\sum_a 1/z_a$ subject to $g_s(z):=d^{-3}\sum_a r_2(s+k_a)z_a\le1$ for all $s$. For any
+$\lambda\ge0$ supported on $\{s\in K\}$ and any feasible $z$,
+\[
+\sum_a\frac1{z_a}\ \ge\ \sum_a\frac1{z_a}+\sum_{s}\lambda_s\big(g_s(z)-1\big)\ \ge\ \min_{z>0}\Big[\sum_a\Big(\frac1{z_a}+c_a z_a\Big)\Big]-\sum_s\lambda_s
+=2\sum_a\sqrt{c_a}-\sum_s\lambda_s ,
+\]
+with $c_a=d^{-3}\sum_{s}\lambda_s r_2(s+k_a)$. Take $\lambda_s=\lambda:=(2d-1)/d^3$ for every $s\in K$. For every set of distinct keys,
+$r_2(k_j+k_a)\ge2-\delta_{ja}$, so $c_a\ge\lambda(2d-1)/d^3=\lambda^2$, with equality for all $a$ exactly when $K$ is Sidon (then the
+bound equals $2d\lambda-d\lambda=(2d-1)/d^2$). If $K$ is not Sidon there are multisets $\{i,j\}\ne\{l,m\}$ with
+$k_i+k_j\equiv k_l+k_m$; then $r_2(k_i+k_j)>2-\delta_{ij}$, hence $c_i>\lambda^2$ and $P_K(1,1)\ge2\sum_a\sqrt{c_a}-d\lambda>(2d-1)/d^2$.
+\end{proof}
+
+\begin{remark}
+The value $(2d-1)/d^2$ itself is the $1\to2$ torus optimum, known from~\cite{KimChitambar2022} (and the $N=1$ case
+of~\cite[Eq.~(16)]{Herasymenko2026}); the content of Theorem~\ref{thm:sidon} is the exact characterisation of the finite codebooks that
+attain it. For $d=2$ it recovers the observation of~\cite{Jing2012} that three equally spaced equatorial qubit states already
+determine the phase-covariant cloner (there for single-copy fidelity). Our necessity statements concern \emph{global} fidelity only.
+\end{remark}
+
+\section{The torus theorem}\label{sec:torus}
+\begin{theorem}[Torus theorem]\label{thm:torus}
+Let $K$ be a $B_{T+k}$ set mod $q$. Then $P_K(T,k)=\Ptor(d;T,k)$ in each of the following cases:
+(a) $d=2$, all $T,k\ge1$;\quad (b) $T\in\{1,2,3\}$, all $d\ge2$, $k\ge1$.
+\end{theorem}
+
+\subsection{Reduction to a packing inequality}
+Let $C$ be the set of balanced vectors with entries $\lfloor k/d\rfloor$ or $\lfloor k/d\rfloor+1$ summing to $k$, and for
+$|b|=T$ put $Z_b=\sum_{g\in C}\mult(b+g)$ and $a_b=\sqrt{\mult(b)/Z_b}$. For a shift $\Delta\in\Z^d$ with $\sum_i\Delta_i=k$ define
+\[
+\Lambda(\Delta)=\sum_{|b|=T,\ b\ge\Delta^-}a_b\,\mult(b+\Delta),\qquad \Lambda_0=\Lambda(g)\ (g\in C),\qquad
+\rho(F)=\frac{1}{\Lambda_0}\sum_{\Delta\in F}\Lambda(\Delta).
+\]
+\begin{lemma}[Separation]\label{lem:sep}
+Let $K$ be a $B_h$ set mod $q$ and let $w\in\Z^d$, $w\ne0$, satisfy $\sum_iw_i=0$ and $\sum_ik_iw_i\equiv0\pmod q$. Then
+$\lVert w\rVert_1\ge2(h+1)$.
+\end{lemma}
+\begin{proof}
+Since $\sum_iw_i=0$, the positive and negative parts $w^\pm\ge0$ satisfy $|w^+|=|w^-|=\lVert w\rVert_1/2$, and they have disjoint
+supports, so they are distinct multisets on $[d]$ ($w\ne0$). If $\lVert w\rVert_1\le2h$, add the same multiset of size $h-|w^+|$
+(e.g.\ copies of index $1$) to both; this gives two distinct multisets of size $h$ whose $K$-sums differ by $\sum_ik_iw_i\equiv0$,
+contradicting $B_h$.
+\end{proof}
+
+\begin{proposition}\label{prop:reduction}
+If $K$ is $B_{T+k}$, two distinct torus charges merged into the same class of Lemma~\ref{lem:R} satisfy
+$\lVert\Delta-\Delta'\rVert_1\ge2(T+k+1)$. Consequently, if every family $F$ of shifts $\Delta\in\Z^d$ with $\sum_i\Delta_i=k$ and $|\Delta^-|\le T$ (the charges $\beta-\alpha$ with
+$|\alpha|=T$, $|\beta|=T+k$), pairwise $\lVert\Delta-\Delta'\rVert_1\ge 2(T+k+1)$ and $|F|\ge2$ satisfies $\rho(F)\le1$, then the torus dual point
+$z^\star_\alpha=d^{2T+k}a_\alpha/\Lambda_0$ (which corresponds to the dual point of~\cite[Eq.~(147)]{Herasymenko2026} via $y_\alpha=\mult(\alpha)/z_\alpha$) is feasible for $K$, and $P_K(T,k)=\Ptor$.
+\end{proposition}
+\begin{proof}
+\emph{Classes.} $B_{T+k}$ implies $B_T$, so each class $\{\alpha:K\cdot\alpha\equiv w\}$ of Lemma~\ref{lem:R} is a single multiset
+$\alpha$, with $r_T(w)=\mult(\alpha)$; likewise $r_{T+k}(v)=\mult(\beta)$ for the unique $\beta$ with $K\cdot\beta\equiv v$, if any. The
+constraint of class $s$ therefore reads $\sum_{(\alpha,\beta):K\cdot(\beta-\alpha)\equiv s}\mult(\beta)\,z_\alpha\le d^{2T+k}$. Group the
+pairs by their charge $\Delta=\beta-\alpha$; the charges occurring form the family $F_s=\{\Delta:K\cdot\Delta\equiv s\}$, and every $\alpha$
+with $\alpha+\Delta\ge0$ occurs with each $\Delta\in F_s$. Two distinct $\Delta,\Delta'\in F_s$ have $w=\Delta-\Delta'\ne0$, $\sum w_i=0$ and
+$K\cdot w\equiv0$, so $\lVert\Delta-\Delta'\rVert_1\ge2(T+k+1)$ by Lemma~\ref{lem:sep}. The class-$s$ constraint is
+$\sum_{\Delta\in F_s}\sum_{\alpha\ge\Delta^-}\mult(\alpha+\Delta)\,z_\alpha\le d^{2T+k}$.
+
+\emph{Torus dual.} Put $z^\star_\alpha=d^{2T+k}a_\alpha/\Lambda_0$. Then the class-$s$ constraint at $z^\star$ is exactly $\rho(F_s)\le1$. For
+$|F_s|=1$ this is $\Lambda(\Delta)\le\Lambda_0$, which is the feasibility of $z^\star$ in the torus problem (where every class is a single
+charge); for $|F_s|\ge2$ it is the hypothesis. The objective is
+$\sum_\alpha\mult(\alpha)/z^\star_\alpha=d^{-(2T+k)}\Lambda_0\sum_\alpha\sqrt{\mult(\alpha)Z_\alpha}$. Since $a$ is $S_d$-invariant and $C$ is a single
+$S_d$-orbit, $\Lambda(g)=\Lambda_0$ for all $g\in C$, and averaging over $C$ gives $\Lambda_0=|C|^{-1}\sum_\alpha a_\alpha Z_\alpha
+=|C|^{-1}\sum_\alpha\sqrt{\mult(\alpha)Z_\alpha}$. Hence the objective equals $|C|\Lambda_0^2/d^{2T+k}$, which is exactly the optimal fidelity
+$F^\star_{\rm ph}(d,T,k)=\Ptor$ of~\cite[Eq.~(16)]{Herasymenko2026}. Therefore $P_K(T,k)\le\Ptor$, and Lemma~\ref{lem:lower} gives equality.
+\end{proof}
+\begin{remark}[Identification with the dual certificate of~\cite{Herasymenko2026}]\label{rem:torusdual}
+In the notation of~\cite[Sec.~X]{Herasymenko2026} ($N=T$, $K=k$, $\mathcal C_{d,K}=C$, $\mathcal D_\Delta=\{b:b+\Delta\ge0\}$ by their Eq.~(111)), the
+phase-covariant dual of their Prop.~X.2 has variables $y_b>0$ and, by their Eq.~(119), one scalar constraint per shift,
+$\sum_{b\in\mathcal D_\Delta}|v_\Delta(b)|^2/y_b\le1$ with $|v_\Delta(b)|^2=d^{-(2T+k)}\mult(b)\mult(b+\Delta)$ (their Eq.~(115)). Their quantities $Z_b$
+(Eq.~(101)) and $\Lambda(\Delta)$ (Eq.~(141)) coincide with ours. Under $y_b=\mult(b)/z_b$ this constraint is exactly the single-charge
+constraint $d^{-(2T+k)}\sum_{b\ge\Delta^-}\mult(b+\Delta)z_b\le1$ of Lemma~\ref{lem:R}, and the objectives agree, $\sum_by_b=\sum_b\mult(b)/z_b$. Their dual
+point, Eq.~(147), $y_b=\Lambda(\Gamma_0)\sqrt{\mult(b)Z_b}/d^{2T+k}$, corresponds to $z_b=\mult(b)/y_b=d^{2T+k}a_b/\Lambda_0=z^\star_b$. Their Eq.~(148)
+shows that the constraint of shift $\Delta$ at this point equals $\Lambda(\Delta)/\Lambda(\Gamma_0)$, and their Prop.~X.5 (Eq.~(146)) gives
+$\Lambda(\Delta)\le\Lambda(\Gamma_0)=\Lambda_0$ for every integer shift with $|\Delta|=k$. Hence $z^\star$ is feasible for every single-charge class,
+which is the step used in the proof above; its objective is their Eq.~(150), $|C|\Lambda_0^2/d^{2T+k}=F^\star_{\rm ph}(d,T,k)$.
+\end{remark}
+
+\subsection{The packing inequality}
+\begin{theorem}\label{thm:packing}
+Every family as in Proposition~\ref{prop:reduction} with $|F|\ge2$ satisfies:
+(a) $\rho(F)\le1$ for $d=2$, all $T,k$;
+(b) $\rho(F)\le\frac{d}{(k+1)(d-k/2)}$ for $T=1$, $k\le d-1$, and $\rho(F)\le\frac{3}{4(d-1)}$ for $T=1$, $k\ge d$;
+(c) $\rho(F)\le0.9961$ for $T=2$, $d\ge3$;
+(d) $\rho(F)\le0.9706$ for $T=3$, $d\ge3$.
+\end{theorem}
+Parts (a) and (b) have complete pen-and-paper proofs (Appendix~\ref{app:proofs}). Parts (c) and (d) are computer-assisted:
+analytic bounds (normalisation Lemma N, structure Lemma S, multinomial moves Lemma M, and a Johnson-type multiset packing
+bound Lemma J) reduce them to finitely many closed-form evaluations, which are verified in interval arithmetic, and to finitely
+many residual cases closed separately (13 at $T=2$, by Lagrangian bounds evaluated in interval arithmetic; 18 at $T=3$, by exact
+clique-LP certificates); see Appendix~\ref{app:ca}. The decimal constants are
+outward-rounded upper bounds; every certificate is compared with $1$ in exact rational or interval arithmetic.
+
+\begin{conjecture}\label{conj:TT}
+For all $d\ge3$, $T\ge4$ and $k\ge1$, every family as in Proposition~\ref{prop:reduction} with $|F|\ge2$ satisfies $\rho(F)<1$;
+in particular, $P_K(T,k)=\Ptor$ for every $B_{T+k}$ set $K$.
+\end{conjecture}
+The conjecture is certified by exact clique-LP certificates for $T=4$ ($3\le d\le10$, $k\le12$; $11\le d\le14$, $k\le10$), $T=5$
+($3\le d\le9$, $k\le6$), all $d\le16$ with $T+k\le5$, and $d=3$ with $T\le60$ ($k=1$) and $T\le40$ ($k\le3$). On $d=3$ the margin
+$1-\max\rho$ decays like $\approx2.9/T^2$, so a proof for all $T$ must be sharp in $T$.
+
+\begin{table}[t]\centering
+\caption{Torus values $\Ptor(4;T,k)$, computed from~\cite[Eq.~(16)]{Herasymenko2026} and independently from Lemma~\ref{lem:R}
+(agreement $<10^{-9}$), and Werner's universal value $W(4,T,k)=D_T/D_{T+k}$.}\label{tab:torus}
+\begin{tabular}{ccc}\toprule
+$(T,k)$ & $\Ptor(4;T,k)$ & $W(4,T,k)$\\\midrule
+(1,1)&0.437500&0.400000\\
+(1,2)&0.281250&0.200000\\
+(2,1)&0.577816&0.500000\\
+(1,3)&0.234375&0.114286\\
+(2,2)&0.428776&0.285714\\
+(3,1)&0.682631&0.571429\\\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Negative results}\label{sec:neg}
+Sidon alone does not suffice beyond $T+k=2$. For $K=\{18,21,27,28\}\subset\Z_{32}$ (Sidon, not $B_3$),
+$P_K(1,1)=0.4375=\Ptor$ but $P_K(1,2)=0.291797>\Ptor=0.281250$ and $P_K(2,1)=0.607913>\Ptor=0.577816$.
+\begin{table}[tbp]\centering\small
+\caption{Counterfeiting values $P_K(T,k)$ at $T+k\in\{3,4\}$ for the sets of Table~\ref{tab:negsets}, from the reduced dual of Lemma~\ref{lem:R} (QH-Lab \texttt{qhlab.lemma\_r}). Bold: largest value in the row. A matched $B_{T+k}$ set of the same size gives $\Ptor$ in every row. All entries agree with the independent R5 sweep to $\le5\times10^{-8}$; for $d=4$ they also agree with a primal (lower-bound) SDP to $\le10^{-6}$.}\label{tab:neg}
+\begin{tabular}{cc c cccc}\toprule
+$d$ & $(T,k)$ & $\Ptor(d;T,k)$ & Sidon only & Singer & AP & random\\\midrule
+4 & (1,2) & 0.281250 & 0.295129 & 0.343750 & \textbf{0.686077} & 0.434341\\
+4 & (2,1) & 0.577816 & 0.624386 & 0.814044 & \textbf{0.918002} & 0.804521\\
+4 & (1,3) & 0.234375 & 0.248486 & 0.331215 & \textbf{0.604402} & 0.409700\\
+4 & (2,2) & 0.428776 & 0.519855 & 0.764730 & 0.875034 & \textbf{0.907654}\\
+4 & (3,1) & 0.682631 & 0.800184 & \textbf{0.985848} & 0.969445 & 0.937383\\
+\midrule
+6 & (1,2) & 0.138889 & 0.168386 & 0.212963 & \textbf{0.674107} & 0.378659\\
+6 & (2,1) & 0.421234 & 0.456406 & 0.715224 & \textbf{0.930640} & 0.776000\\
+6 & (1,3) & 0.083333 & 0.141279 & 0.212560 & \textbf{0.600597} & 0.245909\\
+6 & (2,2) & 0.232883 & 0.304882 & 0.674970 & \textbf{0.881735} & 0.669629\\
+6 & (3,1) & 0.517533 & 0.714506 & \textbf{0.983498} & 0.976595 & 0.909976\\
+\midrule
+8 & (1,2) & 0.082031 & 0.119188 & 0.152344 & \textbf{0.669905} & 0.368231\\
+8 & (2,1) & 0.330058 & 0.445114 & 0.666175 & \textbf{0.936120} & 0.851925\\
+8 & (1,3) & 0.038086 & 0.095927 & 0.148619 & \textbf{0.599266} & 0.309036\\
+8 & (2,2) & 0.144007 & 0.363933 & 0.628594 & \textbf{0.885440} & 0.800783\\
+8 & (3,1) & 0.413747 & 0.792293 & 0.984480 & 0.979150 & \textbf{0.988168}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[tbp]\centering\small
+\caption{Key sets used in Table~\ref{tab:neg} (one set per $d$ and type, the same for every $(T,k)$ except Sidon-only and random, which were drawn per row in the R5 sweep). ``Sidon only'' sets are $B_2$ but not $B_3$; Singer sets are perfect difference sets, hence Sidon and not $B_3$; AP is $\{0,\dots,d-1\}$ with $q=2^{20}$ (no wrap-around).}\label{tab:negsets}
+\begin{tabular}{cc ll}\toprule
+$d$ & $(T,k)$ & type & $K\subset\Z_q$\\\midrule
+4 & (1,2) & Sidon only & $\{13,20,21,31\}\subset\Z_{32}$\\
+4 & all & Singer & $\{0,1,3,9\}\subset\Z_{13}$\\
+4 & all & AP & $\{0,1,2,3\}\subset\Z_{1048576}$\\
+4 & (1,2) & random & $\{1,7,8,11\}\subset\Z_{16}$\\
+4 & (2,1) & Sidon only & $\{5,10,27,29\}\subset\Z_{32}$\\
+4 & (2,1) & random & $\{6,8,9,11\}\subset\Z_{16}$\\
+4 & (1,3) & Sidon only & $\{0,4,12,27\}\subset\Z_{32}$\\
+4 & (1,3) & random & $\{6,8,9,11\}\subset\Z_{16}$\\
+4 & (2,2) & Sidon only & $\{7,8,10,19\}\subset\Z_{32}$\\
+4 & (2,2) & random & $\{0,10,12,14\}\subset\Z_{16}$\\
+4 & (3,1) & Sidon only & $\{3,10,22,25\}\subset\Z_{32}$\\
+4 & (3,1) & random (Sidon) & $\{0,7,10,12\}\subset\Z_{16}$\\
+\midrule
+6 & (1,2) & Sidon only & $\{1,29,50,110,116,117\}\subset\Z_{128}$\\
+6 & all & Singer & $\{0,1,3,10,14,26\}\subset\Z_{31}$\\
+6 & all & AP & $\{0,1,2,3,4,5\}\subset\Z_{1048576}$\\
+6 & (1,2) & random & $\{0,11,15,17,21,29\}\subset\Z_{32}$\\
+6 & (2,1) & Sidon only & $\{4,45,67,72,95,125\}\subset\Z_{128}$\\
+6 & (2,1) & random & $\{1,5,6,17,29,30\}\subset\Z_{32}$\\
+6 & (1,3) & Sidon only & $\{11,12,99,117,123,125\}\subset\Z_{128}$\\
+6 & (1,3) & random & $\{5,9,11,27,28,31\}\subset\Z_{32}$\\
+6 & (2,2) & Sidon only & $\{14,25,30,60,82,121\}\subset\Z_{128}$\\
+6 & (2,2) & random & $\{2,4,5,23,25,29\}\subset\Z_{32}$\\
+6 & (3,1) & Sidon only & $\{0,10,23,43,91,126\}\subset\Z_{128}$\\
+6 & (3,1) & random & $\{5,9,13,15,22,31\}\subset\Z_{32}$\\
+\midrule
+8 & (1,2) & Sidon only & $\{51,53,59,83,93,104,121,122\}\subset\Z_{128}$\\
+8 & all & Singer & $\{0,1,3,13,32,36,43,52\}\subset\Z_{57}$\\
+8 & all & AP & $\{0,1,2,3,4,5,6,7\}\subset\Z_{1048576}$\\
+8 & (1,2) & random & $\{0,6,8,12,16,21,24,27\}\subset\Z_{32}$\\
+8 & (2,1) & Sidon only & $\{0,15,43,60,78,92,97,104\}\subset\Z_{128}$\\
+8 & (2,1) & random & $\{1,2,9,10,14,16,17,29\}\subset\Z_{32}$\\
+8 & (1,3) & Sidon only & $\{14,30,80,84,85,95,98,117\}\subset\Z_{128}$\\
+8 & (1,3) & random & $\{1,5,7,10,16,17,23,30\}\subset\Z_{32}$\\
+8 & (2,2) & Sidon only & $\{16,45,51,52,82,91,106,110\}\subset\Z_{128}$\\
+8 & (2,2) & random & $\{0,2,6,16,21,27,28,31\}\subset\Z_{32}$\\
+8 & (3,1) & Sidon only & $\{0,24,43,50,60,108,117,122\}\subset\Z_{128}$\\
+8 & (3,1) & random & $\{1,6,8,13,17,21,27,31\}\subset\Z_{32}$\\
+\bottomrule\end{tabular}
+\end{table}
+
+Table~\ref{tab:neg} extends this to $T+k\in\{3,4\}$ and $d\in\{4,6,8\}$. In all 15 rows every set that is Sidon but not $B_{T+k}$
+(the Sidon-only sets and the Singer sets) has $P_K(T,k)>\Ptor$, and at fixed $T+k$ the margin grows with $T$. Singer sets, which are optimal
+for bias and form equiangular tight frames, are always worse than the Sidon-only sets and come within $0.017$ of $1$ at $(3,1)$,
+where they are the worst set tested for $d=4,6$. Arithmetic progressions, which have large bias, are the worst set in 11 of the
+15 rows. Small Fourier bias therefore does not imply counterfeit resistance; what matters is the absence of
+additive coincidences of order $T+k$.
+These separations are numerical: the entries are reduced-dual values (for $d=4$ also bracketed by a primal SDP), not certificates.
+The failure of Sidon-only sets is also not universal in $d$: for $d=2$ and $(T,k)=(1,2)$, every Sidon set that is not $B_3$ among the
+24 we tested (e.g.\ $K=\{0,26\}\subset\Z_{39}$) attains $\Ptor(2;1,2)=0.75$, whereas for $d=2$, $(T,k)=(2,1)$ and for $d=3$ at
+$T+k\in\{3,4\}$ none of the tested sets does (24 and 72 sets, $q<40$).
+
+\subsection{The case $T=1$: an exact characterisation}\label{sec:t1iff}
+Fix $k\ge1$. A \emph{charge} is a vector $c\in\Z^d$ with $\sum_ic_i=k$ and $c+e_a\ge0$ for some $a\in[d]$; let $\mathcal C_k$ be the
+(finite) set of charges, and put
+\[
+M(c)=\sum_{a\in[d]}\mult(c+e_a)\qquad(\mult(\gamma):=0\text{ if }\gamma\not\ge0),\qquad M^\star_k=\max_{c\in\mathcal C_k}M(c).
+\]
+A charge with $M(c)=M^\star_k$ is \emph{tight}. Charges $c\ne c'$ are \emph{merged} by $K$ if $K\cdot c\equiv K\cdot c'\pmod q$, where
+$K\cdot c=\sum_ic_ik_i$. Every charge has $M(c)\ge1$. For $s\in\Z_q$ let $\Lambda_K(s)=\sum_{a\in[d]}r_{k+1}(s+k_a)$.
+
+\begin{lemma}[Aggregation]\label{lem:agg}
+$\Lambda_K(s)=\sum_{c\in\mathcal C_k:\,K\cdot c\equiv s}M(c)$ for every $s\in\Z_q$.
+\end{lemma}
+\begin{proof}
+$r_{k+1}(v)=\sum_{|\beta|=k+1,\,K\cdot\beta\equiv v}\mult(\beta)$. Substituting $c=\beta-e_a$,
+$\sum_a\sum_{K\cdot\beta\equiv s+k_a}\mult(\beta)=\sum_a\sum_{c:\,c+e_a\ge0,\,K\cdot c\equiv s}\mult(c+e_a)=\sum_{c\in\mathcal C_k,\,K\cdot c\equiv s}M(c)$.
+\end{proof}
+
+\begin{lemma}[Tight charges]\label{lem:t1tight}
+For all $d\ge2$, $k\ge1$, the tight charges in $\mathcal C_k$ are exactly the balanced vectors $c\ge0$ with $|c|=k$ and entries in
+$\{\lfloor k/d\rfloor,\lfloor k/d\rfloor+1\}$; every other charge has $M(c)<M^\star_k$. In particular
+$M^\star_k=\mult(c^\ast)\sum_a\frac{k+1}{c^\ast_a+1}$ for any balanced $c^\ast$.
+\end{lemma}
+\begin{proof}
+\emph{Charges with a negative entry.} Such a charge is $c=\beta-e_a$ with $|\beta|=k+1$ and $\beta_a=0$, so $M(c)=\mult(\beta)$.
+Pick $b$ with $\beta_b\ge1$. Then $c'=\beta-e_b\ge0$ is a charge, and
+$M(c')\ge\mult(c'+e_b)+\mult(c'+e_a)=\mult(\beta)+\mult(\beta-e_b+e_a)>\mult(\beta)=M(c)$.
+
+\emph{Nonnegative charges.} For $c\ge0$ with $|c|=k$ we have $M(c)=\mult(c)\sum_a\frac{k+1}{c_a+1}$. Suppose $c_i=x\ge y+2$ with
+$y=c_j$, and put $c'=c-e_i+e_j$ and $R=\sum_{a\ne i,j}\frac1{c_a+1}\ge0$. Then $\mult(c')=\mult(c)\,\frac{x}{y+1}$, and
+\[
+\frac{M(c')}{(k+1)\mult(c)}=\frac1{y+1}+\frac{x}{(y+1)(y+2)}+\frac{x}{y+1}R\ >\ \frac1{y+1}+\frac1{x+1}+R=\frac{M(c)}{(k+1)\mult(c)} .
+\]
+This holds because $x/(y+1)>1$ and $x(x+1)>(y+1)(y+2)$. So any non-balanced $c\ge0$ is strictly beaten by a less unbalanced charge.
+The balanced charges are permutations of one another, so they all have the same value.
+\end{proof}
+
+\begin{proposition}\label{prop:t1tor}
+$\Ptor(d;1,k)=M^\star_k/d^{k+1}$. Moreover the program
+\begin{equation}\label{eq:t1tor}
+\min_{z\in(0,\infty)^d}\sum_a\frac1{z_a}\quad\text{s.t.}\quad d^{-(k+2)}\sum_a\mult(c+e_a)\,z_a\le1\quad\forall c\in\mathcal C_k
+\end{equation}
+has value $\Ptor(d;1,k)$ and the unique minimiser $z^\circ=(d^{k+2}/M^\star_k)\mathbf 1$.
+\end{proposition}
+\begin{proof}
+The feasible set of \eqref{eq:t1tor} is convex and invariant under permutations of $[d]$ (they permute $\mathcal C_k$), and the objective
+is strictly convex and symmetric. Hence the minimiser is unique (the midpoint of two minimisers would be strictly better) and
+permutation invariant, $z=\zeta\mathbf 1$; such $z$ is feasible iff $\zeta M^\star_k\le d^{k+2}$, so the value is $M^\star_k/d^{k+1}$.
+Now let $K'=\{1,b,b^2,\dots,b^{d-1}\}$ with $b=k+3$, and $q'>(k+2)b^{d-1}$. Sums of $(k+2)$-multisets from $K'$ have base-$b$ digits $\le k+2$,
+so $K'$ is $B_{k+2}$ mod $q'$, and two charges $c=\beta-e_a$, $c'=\beta'-e_{a'}$ with $K'\cdot c\equiv K'\cdot c'$ satisfy
+$K'\cdot(\beta+e_{a'})\equiv K'\cdot(\beta'+e_a)$, hence $\beta+e_{a'}=\beta'+e_a$ and $c=c'$. By Lemmas~\ref{lem:R} and~\ref{lem:agg}, $P_{K'}(1,k)$
+is therefore exactly \eqref{eq:t1tor}. Since $K'$ is $B_{k+1}$, Theorem~\ref{thm:torus}(b) gives $P_{K'}(1,k)=\Ptor(d;1,k)$.
+\end{proof}
+
+\begin{theorem}[$T=1$ characterisation]\label{thm:t1iff}
+For every $K\subset\Z_q$ with $|K|=d\ge2$ and every $k\ge1$,
+\[
+P_K(1,k)=\Ptor(d;1,k)\iff\max_{s\in\Z_q}\Lambda_K(s)\le M^\star_k ,
+\]
+and otherwise $P_K(1,k)>\Ptor(d;1,k)$. Equivalently, equality holds iff no class $\{c\in\mathcal C_k:K\cdot c\equiv s\}$ has total
+weight $\sum M(c)$ above $M^\star_k$.
+\end{theorem}
+\begin{proof}
+With $T=1$ and distinct keys, $r_1=\mathbf 1_K$, so by Lemmas~\ref{lem:R} and~\ref{lem:agg}, $P_K(1,k)$ is the minimum of $\sum_a1/z_a$ subject
+to $d^{-(k+2)}\sum_{c:\,K\cdot c\equiv s}\sum_a\mult(c+e_a)z_a\le1$ for all $s$. Each such constraint is a sum of nonnegative terms, one per
+charge in the class, so every $K$-feasible $z$ is feasible for \eqref{eq:t1tor}; this gives $P_K(1,k)\ge\Ptor$ (Lemma~\ref{lem:lower}). If
+equality holds, the $K$-optimal $z$, which exists by Lemma~\ref{lem:R}, minimises \eqref{eq:t1tor}, so $z=z^\circ$ by
+Proposition~\ref{prop:t1tor}. Then $K$-feasibility of $z^\circ$ reads $\Lambda_K(s)\le M^\star_k$ for all $s$. Conversely, if this holds,
+$z^\circ$ is $K$-feasible with value $\Ptor$.
+\end{proof}
+
+\begin{proposition}[Lagrangian form of necessity]\label{prop:t1lag}
+Let $\mathcal T$ be the set of tight charges and, for $\mu\ge0$, $\lambda_s=\mu\,\#\{t\in\mathcal T:K\cdot t\equiv s\}$. Then
+\[
+P_K(1,k)\ \ge\ 2\sum_a\sqrt{c_a}-\mu|\mathcal T|,\qquad c_a=d^{-(k+2)}\sum_s\lambda_sr_{k+1}(s+k_a)\ \ge\ c^\circ:=\frac{\mu|\mathcal T|M^\star_k}{d^{k+3}},
+\]
+with equality $c_a=c^\circ$ for all $a$ iff no tight charge is merged with another charge. At $\mu|\mathcal T|=M^\star_k/d^{k+1}$ the
+right-hand side equals $\Ptor(d;1,k)$ when no tight charge is merged, and exceeds it otherwise.
+\end{proposition}
+\begin{proof}
+The first inequality is the Lagrangian bound in the proof of Theorem~\ref{thm:sidon}, with $r_2$ replaced by $r_{k+1}$. By
+Lemma~\ref{lem:agg} applied to the single index $a$, $r_{k+1}(K\cdot t+k_a)=\sum_{c:\,K\cdot c\equiv K\cdot t}\mult(c+e_a)\ge\mult(t+e_a)$, with
+strict inequality iff the class of $t$ contains some $c\ne t$ with $c+e_a\ge0$. So
+$c_a\ge d^{-(k+2)}\mu\sum_{t\in\mathcal T}\mult(t+e_a)$. The last sum does not depend on $a$, because $\mathcal T$ is permutation invariant,
+and summing over $a$ gives $|\mathcal T|M^\star_k$, so it equals $|\mathcal T|M^\star_k/d$. If a tight $t$ is merged with some $c\ne t$,
+pick $a$ with $c+e_a\ge0$; then $c_a>c^\circ$. Finally, with $u=\mu|\mathcal T|$, $2d\sqrt{c^\circ}-u$ is maximised at $u=M^\star_k/d^{k+1}$,
+where it equals $M^\star_k/d^{k+1}=\Ptor$.
+\end{proof}
+
+\begin{corollary}[Necessity of the merging condition]\label{cor:t1nec}
+If some tight charge is merged with another charge, then $P_K(1,k)>\Ptor(d;1,k)$.
+\end{corollary}
+\begin{proof}
+The class of that tight charge has weight at least $M^\star_k+1$; apply Theorem~\ref{thm:t1iff}, or Proposition~\ref{prop:t1lag} for an
+explicit lower bound.
+\end{proof}
+
+Say that $K$ satisfies condition $(\mathrm H_k)$ if no tight charge is merged with another charge. By Corollary~\ref{cor:t1nec},
+$(\mathrm H_k)$ is necessary for $P_K(1,k)=\Ptor$. It is also sufficient in the following cases.
+
+\begin{lemma}\label{lem:binom}
+Let $N\ge2$, $m=\lfloor N/2\rfloor$, and $u,v\ge0$ with $u+v\le m-1$. Then $\binom Nu+\binom Nv\le\binom Nm$.
+\end{lemma}
+\begin{proof}
+Assume $u\le v$ and put $t=m-1-u$, so $u\le v\le t$ and $\binom Nv\le\binom Nt$. Further,
+$\binom N{t+1}-\binom Nt=\binom Nt\frac{N-2t-1}{t+1}\ge\binom Nt\frac{2u+1}{m-u}$, since $N-2t-1\ge2u+1$ and $t+1=m-u$. If $t\ge u+1$, then
+$\binom Nt\ge\binom N{u+1}=\binom Nu\frac{N-u}{u+1}$, and $\frac{(2u+1)(N-u)}{(u+1)(m-u)}\ge1$. If $t=u$, then $m=2u+1$ and
+$\frac{2u+1}{m-u}\ge1$. In both cases $\binom N{t+1}-\binom Nt\ge\binom Nu$, so
+$\binom Nu+\binom Nv\le\binom N{t+1}\le\binom Nm$, because $t+1\le m$.
+\end{proof}
+
+\begin{theorem}[Sufficiency of $(\mathrm H_k)$ in three regimes]\label{thm:t1suff}
+$P_K(1,k)=\Ptor(d;1,k)$ iff $(\mathrm H_k)$ holds, in each of the following cases.
+\begin{enumerate}
+\item[(a)] $k=1$, all $d$: here $(\mathrm H_1)$ is the Sidon property (Theorem~\ref{thm:sidon}).
+\item[(b)] $d=2$, all $k$: here $(\mathrm H_k)$ holds iff $n:=\mathrm{ord}(k_2-k_1)\ge\lceil k/2\rceil+2$.
+\item[(c)] $k=2$, all $d$: here $(\mathrm H_2)$ holds iff the only coincidences among sums of $3$-multisets from $K$ are
+$3k_i\equiv3k_l$, i.e.\ every $3$-multiset with two distinct elements has a unique sum.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+Necessity is Corollary~\ref{cor:t1nec}; we prove sufficiency through Theorem~\ref{thm:t1iff}.
+
+(a) For $k=1$, $M(e_j)=2d-1$, and every other charge $c=e_b+e_{b'}-e_a$ has $M(c)\le2<2d-1$. If $k_i+k_j\equiv k_l+k_m$ with
+$\{i,j\}\ne\{l,m\}$, then the tight charge $e_i$ is merged with $e_l+e_m-e_j\ne e_i$, so $(\mathrm H_1)$ implies Sidon. For Sidon $K$, the
+dual part of the proof of Theorem~\ref{thm:sidon} shows that $\Lambda_K\le2d-1$.
+
+(b) Let $N=k+2$ and $g=k_2-k_1$. The charges are $c=(k-j,j)$, $j=-1,\dots,k+1$, with
+$M(c)=\binom{k+1}j+\binom{k+1}{j+1}=\binom N{i}$, where $i=j+1\in[0,N]$, and $K\cdot c=kk_1+jg$. So two charges are merged iff their indices
+$i$ agree mod $n$. The tight indices are $\lfloor N/2\rfloor$ and $\lceil N/2\rceil$, so $(\mathrm H_k)$ holds iff $n>\lceil N/2\rceil$,
+i.e.\ $n\ge\lceil k/2\rceil+2$. Then every class has at most two indices $i<i+n$, and with $v=N-i-n$ we get
+$i+v=N-n\le\lfloor N/2\rfloor-1$. Lemma~\ref{lem:binom} gives $\binom Ni+\binom N{i+n}=\binom Ni+\binom Nv\le\binom N{\lfloor N/2\rfloor}=M^\star_k$.
+
+(c) Let $d\ge3$ ($d=2$ is covered by (b)). The weights are $M(e_i+e_j)=6d-6$ for $i\ne j$, $M(2e_i)=3d-2$, and
+$M(\beta-e_a)=\mult(\beta)\in\{1,3,6\}$ for $|\beta|=3$, $\beta_a=0$. So the tight charges are exactly the $e_i+e_j$, $i\ne j$.
+A tight $e_i+e_j$ is merged with $c'=\beta-e_a$ ($\beta\ge0$) iff $K\cdot(e_i+e_j+e_a)\equiv K\cdot\beta$ with $\beta\ne e_i+e_j+e_a$. Every
+$3$-multiset with two distinct elements has the form $\{i,j,a\}$ with $i\ne j$, so this proves the stated form of $(\mathrm H_2)$.
+
+Assume $(\mathrm H_2)$ and fix a class $S$; we show $\sum_{c\in S}M(c)\le6d-6$.
+\begin{itemize}
+\item If $S$ contains a tight charge, $S$ is that charge alone.
+\item If $S\ni2e_i$, consider any other $c'\in S$. It is not tight. It is not $2e_l$: from $2k_i\equiv2k_l$ we would get
+$\{i,i,x\}\sim\{l,l,x\}$, contradicting $(\mathrm H_2)$. So $c'=\beta-e_a$ with $\beta_a=0$. Then $2e_i+e_a$ and $\beta$ are distinct
+$3$-multisets with equal sums, so both are pure, which forces $a=i$ and $\beta=3e_l$. Hence $\sum_SM\le3d-2+(d-1)=4d-3\le6d-6$.
+\item Otherwise every member has the form $c_\nu=\beta_\nu-e_{a_\nu}$ with $\beta_\nu(a_\nu)=0$, and this representation is unique. We use
+three facts.
+\begin{enumerate}
+\item[(1)] If $a_\nu=a_\mu$ for $\nu\ne\mu$, then $K\cdot\beta_\nu\equiv K\cdot\beta_\mu$, so both $\beta$'s are pure.
+\item[(2)] If $\beta_\nu$ has three distinct elements, then for every $\mu\ne\nu$ the $4$-multisets $\beta_\nu+e_{a_\mu}$ and
+$\beta_\mu+e_{a_\nu}$ are disjoint. They have equal sums and are distinct. A common element $x$ could be removed, and this would
+leave distinct $3$-multisets with equal sums; the first of these has at least two distinct elements, contradicting $(\mathrm H_2)$. So the
+supports of $\beta_\nu$ and $\beta_\mu$ are disjoint.
+\item[(3)] For each $l$ there is at most one member $3e_l-e_a$, since $a$ is determined by $k_a\equiv3k_l-s$.
+\end{enumerate}
+Let $x,y,w$ be the numbers of members with $\mult(\beta)=6,3,1$, and let $U$ be the union of the supports of the type-6 $\beta$'s; by (2)
+these supports are pairwise disjoint, so $|U|=3x\le d$. By (1), two members with the same index $a$ both have pure $\beta$'s, so the type-6
+and type-3 members have pairwise distinct indices $a_\nu$, and $x+y\le d$. For a type-1 member $\mu$, $\beta_\mu=3e_l$ has support $\{l\}$, so (2), applied to each type-6 member $\nu$ and this $\mu$, gives
+$l\notin\operatorname{supp}\beta_\nu$; hence $l\notin U$. By (3) these $l$ are pairwise distinct, so $w\le d-3x$. Hence $\sum_SM=6x+3y+w\le6x+3(d-x)+(d-3x)=4d\le6d-6$, since $d\ge3$.
+\end{itemize}
+\end{proof}
+
+\begin{conjecture}\label{conj:t1H}
+For all $d\ge2$ and $k\ge1$: $P_K(1,k)=\Ptor(d;1,k)$ iff $(\mathrm H_k)$ holds.
+\end{conjecture}
+
+\begin{remark}[The $d=2$ exception and $d\ge3$]
+Theorem~\ref{thm:t1suff} explains the $d=2$, $(T,k)=(1,2)$ observation of Section~\ref{sec:neg}. For $d=2$, $B_3$ means $n\ge4$, but
+$P_K(1,2)=\Ptor$ already holds iff $n\ge3$. Thus $\{0,26\}\subset\Z_{39}$ ($n=3$) attains $0.75$, and in general $d=2$ sets with
+$\lceil k/2\rceil+2\le n\le k+1$ attain $\Ptor(2;1,k)$ without being $B_{k+1}$. The mechanism is not specific to $d=2$: by (c), a Sidon
+set whose only $3$-relations are $3k_i\equiv3k_l$ attains $\Ptor(d;1,2)$. Examples are $\{0,1,13\}\subset\Z_{39}$ ($d=3$, value $4/9$),
+$\{0,10,11,14\}\subset\Z_{30}$ ($d=4$, $9/32$) and $\{0,23,34,36,50\}\subset\Z_{69}$ ($d=5$, $24/125$), none of them $B_3$. Similarly
+$\{0,10,26,29\}\subset\Z_{30}$ attains $\Ptor(4;1,3)=15/64$ without being $B_3$. So $B_{T+k}$ is \emph{not} necessary for
+$P_K=\Ptor$ when $d\ge3$, at least for $T=1$. The Sidon-only sets in the tables of Section~\ref{sec:neg} fail because they carry a non-pure $3$-relation; for
+example $\{18,21,27,28\}\subset\Z_{32}$ has $2\cdot18+27\equiv3\cdot21$, a tight charge is merged, and $\max_s\Lambda_K(s)=19>18$.
+\end{remark}
+
+\begin{remark}[No finite codebook works for all $k$]
+Since $\sum_s\Lambda_K(s)=d^{k+2}$, we have $\max_s\Lambda_K(s)\ge d^{k+2}/q$. On the other hand,
+$M^\star_k/d^{k+2}\le\max_\beta\mult(\beta)/d^{k+1}\to0$ as $k\to\infty$, since this is the largest point probability of a uniform
+multinomial. Hence for every finite $K\subset\Z_q$, $P_K(1,k)>\Ptor(d;1,k)$ for all sufficiently large $k$; precisely, this holds as soon as
+$\Ptor(d;1,k)<d/q$.
+\end{remark}
+
+\section{Fusion and additive energy}\label{sec:fusion}
+\begin{theorem}[Fusion]\label{thm:fusion}
+For $x,y$ independent and uniform on $\Z_q$, the optimal average fidelity of a channel $\psi_x\otimes\psi_y\mapsto\psi_{x+y}$ is
+$F_{\rm fuse}(K)=E_q(K)/d^3$. In particular $F_{\rm fuse}(K)\ge(2d-1)/d^2$, with equality iff $K$ is Sidon.
+\end{theorem}
+\begin{proof}
+Let $r(v)=\#\{(a,b):k_b-k_a\equiv v\}$, so $\sum_v r(v)^2=E_q(K)$, and for each $v$ let $S_v=\{j:k_j+v\in K\}$, $|S_v|=r(v)$, with
+$l(j,v)$ the index of $k_j+v$.
+
+\emph{Achievability.} Define $A_v=\sum_{j\in S_v}\ket j\bra{j,l(j,v)}$. Each basis pair $\ket{j,l}$ lies in exactly one branch
+($v=k_l-k_j$), so $\sum_vA_v^\dagger A_v=I$ and $\{A_v\}$ is a channel. On the input,
+\[
+A_v(\psi_x\otimes\psi_y)=\frac1d\sum_{j\in S_v}\omega^{xk_j+y(k_j+v)}\ket j=\frac{\omega^{yv}}d\sum_{j\in S_v}\omega^{(x+y)k_j}\ket j .
+\]
+The $y$-dependent factor is a global phase of the branch, so $\big|\bra{\psi_{x+y}}A_v(\psi_x\otimes\psi_y)\big|^2=r(v)^2/d^3$, and the
+output fidelity is $\sum_v r(v)^2/d^3=E_q(K)/d^3$ for \emph{every} $(x,y)$.
+
+\emph{Optimality.} The Choi operator of the target ensemble is
+$X=\E_{x,y}\,\bar\psi_x\otimes\bar\psi_y\otimes\psi_{x+y}$, with entries
+$X_{(jlm),(j'l'm')}=d^{-3}\,[k_m-k_j\equiv k_{m'}-k_{j'}]\,[k_m-k_l\equiv k_{m'}-k_{l'}]$. Hence $X=d^{-3}\sum_{(s,t)}\ket{\chi_{st}}\bra{\chi_{st}}$,
+where $\chi_{st}$ is the 0/1 indicator of $B_{st}=\{(j,l,m):k_m-k_j\equiv s,\ k_m-k_l\equiv t\}$; the blocks $B_{st}$ partition the basis,
+and on $B_{st}$ the difference $k_l-k_j\equiv s-t=:v$ is constant. Let $Y=\mathrm{diag}_{(j,l)}\,r(k_l-k_j)/d^3$. Since $Y\otimes I$ is
+diagonal and positive on each block, $Y\otimes I\succeq d^{-3}\ket{\chi_{st}}\bra{\chi_{st}}$ iff $\sum_{B_{st}}d^{-3}/(r(v)/d^3)\le1$, i.e.\
+$|B_{st}|\le r(v)$. The map $(j,l,m)\mapsto(l,j)$ sends $B_{st}$ injectively into $\{(a,b):k_b-k_a\equiv -v\}$, whose size is
+$r(-v)=r(v)$. So $Y$ is dual feasible, and $\tr Y=\sum_{(j,l)}r(k_l-k_j)/d^3=\sum_vr(v)^2/d^3=E_q(K)/d^3$.
+
+Finally $E_q(K)\ge2d^2-d$ (the trivial solutions $a=b,c=e$ and $a=c,b=e$), with equality iff $K$ is Sidon, giving the corollary.
+\end{proof}
+
+For $m\ge2$ let $r(v)=\#\{(a,b)\in[d]^2:k_b-k_a\equiv v\}$ as in the proof of Theorem~\ref{thm:fusion}, and define the
+\emph{higher energy}
+\[
+E_m(K)=\sum_{v\in\Z_q}r(v)^m ,
+\]
+so that $E_2(K)=E_q(K)$. For $j=(j_1,\dots,j_m)\in[d]^m$ put $\delta(j)=(k_{j_2}-k_{j_1},\dots,k_{j_m}-k_{j_1})\in\Z_q^{m-1}$ and,
+for $\delta=(\delta_2,\dots,\delta_m)\in\Z_q^{m-1}$ (with $\delta_1:=0$),
+\[
+N(\delta)=\#\{j\in[d]^m:\delta(j)=\delta\}=\#\{a\in[d]:k_a+\delta_i\in K\ \text{for all } i\},
+\]
+the second form because the keys are distinct, so $j$ is determined by $j_1$ and $\delta(j)$.
+
+\begin{lemma}\label{lem:Em}
+$\sum_{\delta\in\Z_q^{m-1}}N(\delta)^2=E_m(K)$.
+\end{lemma}
+\begin{proof}
+$\sum_\delta N(\delta)^2$ counts triples $(a,b,\delta)$ with $k_a+\delta_i\in K$ and $k_b+\delta_i\in K$ for $i=2,\dots,m$. For fixed $(a,b)$ the
+coordinates $\delta_i$ are chosen independently from $(K-k_a)\cap(K-k_b)$, a set of size $\#\{c\in K:c-k_a+k_b\in K\}=r(k_b-k_a)$.
+Hence the count is $\sum_{a,b}r(k_b-k_a)^{m-1}=\sum_v r(v)\cdot r(v)^{m-1}=E_m(K)$.
+\end{proof}
+
+\begin{theorem}[$m$-fold fusion]\label{thm:fusionm}
+Let $m\ge2$ and let $x_1,\dots,x_m$ be independent and uniform on $\Z_q$. The optimal average fidelity of a channel
+$(\C^d)^{\otimes m}\to\C^d$ for $\psi_{x_1}\otimes\dots\otimes\psi_{x_m}\mapsto\psi_{x_1+\dots+x_m}$ is
+\[
+F_m(K)=\frac{E_m(K)}{d^{m+1}} ,
+\]
+and it is attained by a channel whose fidelity equals $F_m(K)$ on \emph{every} input $(x_1,\dots,x_m)$. For $m=2$ this is
+Theorem~\ref{thm:fusion}.
+\end{theorem}
+\begin{proof}
+Write $X_\Sigma=x_1+\dots+x_m$.
+
+\emph{Achievability.} For $\delta\in\Z_q^{m-1}$ let $A_\delta=\sum_{j:\,\delta(j)=\delta}\ket{j_1}\bra{j}$. Every basis vector $\ket j$ of
+$(\C^d)^{\otimes m}$ lies in exactly one branch, and distinct $j$ in one branch have distinct $j_1$, so
+$\sum_\delta A_\delta^\dagger A_\delta=I$ and $\{A_\delta\}$ is a channel. Since $k_{j_i}=k_{j_1}+\delta_i$ on the branch,
+\[
+A_\delta\big(\psi_{x_1}\otimes\dots\otimes\psi_{x_m}\big)=d^{-m/2}\sum_{j:\,\delta(j)=\delta}\omega^{\sum_ix_ik_{j_i}}\ket{j_1}
+=d^{-m/2}\,\omega^{\sum_ix_i\delta_i}\sum_{j:\,\delta(j)=\delta}\omega^{X_\Sigma k_{j_1}}\ket{j_1} .
+\]
+The factor $\omega^{\sum_ix_i\delta_i}$ is a global phase of the branch, so
+$\big|\bra{\psi_{X_\Sigma}}A_\delta(\psi_{x_1}\otimes\dots\otimes\psi_{x_m})\big|^2=N(\delta)^2/d^{m+1}$, and the fidelity is
+$\sum_\delta N(\delta)^2/d^{m+1}=E_m(K)/d^{m+1}$ for every input (Lemma~\ref{lem:Em}).
+
+\emph{Optimality.} The average fidelity of a channel with Choi operator $J$ ($\tr_{\rm out}J=I$) is $\tr(JX)$ with
+$X=\E_{x}\,\bar\psi_{x_1}\otimes\dots\otimes\bar\psi_{x_m}\otimes\psi_{X_\Sigma}$, and $\tr(JX)\le\tr\big(J(Y\otimes I)\big)=\tr Y$
+whenever $Y\otimes I\succeq X$. Averaging $\omega^{x_i t}$ over $x_i$ gives
+\[
+X_{(j,l),(j',l')}=d^{-(m+1)}\prod_{i=1}^m\big[k_l-k_{j_i}\equiv k_{l'}-k_{j'_i}\big] .
+\]
+With $\sigma(j,l)=(k_l-k_{j_1},\dots,k_l-k_{j_m})\in\Z_q^m$ and $B_\sigma=\{(j,l):\sigma(j,l)=\sigma\}$, the blocks $B_\sigma$
+partition the basis and $X=d^{-(m+1)}\sum_\sigma\ket{\chi_\sigma}\bra{\chi_\sigma}$, where $\chi_\sigma$ is the $0/1$ indicator of
+$B_\sigma$. On $B_\sigma$ the input difference vector is constant, $\delta(j)=(\sigma_1-\sigma_i)_{i=2}^m=:\delta_\sigma$, and
+\[
+|B_\sigma|=\#\{l:k_l-\sigma_i\in K\ \forall i\}=\Big|\bigcap_i(K+\sigma_i)\Big|=\Big|\bigcap_i(K-(\delta_\sigma)_i)\Big|=N(\delta_\sigma),
+\]
+after translating by $-\sigma_1$. Let $Y=\mathrm{diag}_j\,N(\delta(j))/d^{m+1}$, which is positive since $N(\delta(j))\ge1$. Because $Y\otimes I$
+is diagonal and $X$ is a direct sum over the blocks, $Y\otimes I\succeq X$ holds iff on every block
+$\sum_{(j,l)\in B_\sigma}d^{-(m+1)}\big/\big(N(\delta_\sigma)/d^{m+1}\big)\le1$, i.e.\ $|B_\sigma|\le N(\delta_\sigma)$, which holds with
+equality. Hence $Y$ is dual feasible and $\tr Y=\sum_jN(\delta(j))/d^{m+1}=\sum_\delta N(\delta)^2/d^{m+1}=E_m(K)/d^{m+1}$.
+\end{proof}
+
+\begin{corollary}\label{cor:fusionm}
+For $m\ge2$, $E_m(K)\ge d^m+d^2-d$, with equality if and only if $K$ is a Sidon set. Hence
+$F_m(K)\ge(d^m+d^2-d)/d^{m+1}$, with equality iff $K$ is Sidon. Moreover $F_m(K)\le1$, with equality iff $K$ is a coset of a
+subgroup of $\Z_q$ of order $d$.
+\end{corollary}
+\begin{proof}
+$r(0)=d$ and $\sum_{v\ne0}r(v)=d^2-d$. For integers $r\ge0$ and $m\ge2$, $r^m\ge r$ with equality iff $r\in\{0,1\}$, so
+$E_m(K)=d^m+\sum_{v\ne0}r(v)^m\ge d^m+d^2-d$, with equality iff $r(v)\le1$ for all $v\ne0$. This is the Sidon property: if
+$k_a+k_e\equiv k_b+k_c$ with $\{a,e\}\ne\{b,c\}$, then the ordered pairs $(b,a)$ and $(e,c)$ are distinct and have the same nonzero
+difference $k_a-k_b\equiv k_c-k_e$; conversely two distinct ordered pairs $(a,b)\ne(c,e)$ with $k_b-k_a\equiv k_e-k_c\not\equiv0$ give
+$k_b+k_c\equiv k_a+k_e$ with $\{b,c\}\ne\{a,e\}$. For the upper bound, $r(v)\le d$ gives $E_m(K)\le d^{m-1}\sum_vr(v)=d^{m+1}$, with
+equality iff $r(v)\in\{0,d\}$ for all $v$, i.e.\ $K+v=K$ for every $v\in K-K$, i.e.\ $K$ is a coset of a subgroup of order $d$.
+\end{proof}
+
+\begin{remark}
+For $m\ge3$ the optimal measurement reads out the full difference vector $\delta\in\Z_q^{m-1}$, and the optimum is the
+\emph{common-base-point} count $\sum_\delta N(\delta)^2$; Lemma~\ref{lem:Em} identifies it with $\sum_v r(v)^m$. For $m=3$ and
+$K=\{0,1,3\}\subset\Z_7$ (Sidon) this gives $33/81$, for $\{0,1,2\}\subset\Z_7$ it gives $45/81$, and for $\{0,1,2,4\}\subset\Z_{11}$
+it gives $100/256$. In the notation of~\cite{SchoenShkredov2013,Shkredov2013HigherEnergies}, $r(v)=(K\circ K)(v)=|K\cap(K-v)|$, $E_m(K)$ is the
+higher energy $\mathsf E_m(K)$, and Lemma~\ref{lem:Em} is the identity $\mathsf E_m(A)=\sum_{s\in G^{m-1}}|A_s|^2$,
+$A_s=A\cap(A-s_1)\cap\dots\cap(A-s_{m-1})$; see also the survey~\cite{Shkredov2015Survey}.
+\end{remark}
+
+
+Thus the same additive structure that makes a codebook hard to clone makes it hard to fuse: Sidon sets minimise both, and
+perfect fusion forces orthogonal (hence clonable) states. Phase-state tokens are also malleable (the public shift $Z^y$ maps
+$\psi_x\mapsto\psi_{x+y}$), and verification oracles leak the key~\cite{Nagaj2016}.
+
+\section{Finite orbits of non-abelian groups}\label{sec:nonab}
+Let $H$ be a compact group acting unitarily on $V$, $G\le H$ closed, and $X=G\cdot f\subset H\cdot f$ with uniform weights. Because
+$X\subset H\cdot f$ and Haar measure is invariant, the $H$-twirl of $R_X$ is $R_H$, i.e.\ $\int_H h\,D\,h^{-1}dh=0$; this identity is used
+in parts (b) and (e) below. Let
+$u_x=\bar x^{(T)}\otimes x^{(T+k)}$, $R_X=\E_X u_xu_x^\dagger$, $R_H=\int_H R_{hf}\,dh$, $D=R_X-R_H$, and $P_\bullet=\min\{\tr Y:Y\otimes I\succeq R_\bullet\}$.
+
+A natural guess, suggested by Proposition~\ref{prop:nearW} and by the torus case, is that matching the $(T+k)$-th moment,
+$\E_X x^{\otimes(T+k)}=\E_H x^{\otimes(T+k)}$, implies $P_X=P_H$. It holds for unitary designs (Werner) and for orbits of
+highest-weight (coherent) vectors~\cite{ChiribellaYang2014,CwiklinskiStudzinski2026}, where Lemma~\ref{lem:B} is tight. It fails in general:
+
+\begin{theorem}[Counterexamples]\label{thm:counter}
+(i) $H=SU(3)$ acting on $V=\Sym^2\C^3$ ($\dim V=6$), $G$ the Hessian group (order 216 mod phases), $(T,k)=(1,1)$: there is a
+fiducial $f$ with $M_2(X)=M_2(H)$ exactly and $P_X-P_H\ge8.0399\times10^{-4}$.
+(ii) $H=SU(2)$ acting on spin 1 (through $SO(3)$, i.e.\ the vector representation on $\C^3$), $G$ the octahedral rotation group (order 24), $(T,k)=(1,1)$: there is a fiducial with
+$M_2(X)=M_2(H)$ exactly and $P_X-P_H\ge6.437\times10^{-4}$.
+\end{theorem}
+Both are certified in ball arithmetic, with exact moment matching established by a Poincar\'e--Miranda (resp.\ intermediate value)
+argument; see Appendix~\ref{app:ca}. Independently re-implemented checks (exact Schur--Weyl twirl for $SU(3)$, exact Euler product
+rule for $SO(3)$) with other fiducials give strictly positive gaps in every tuned case (4/4 and 4/4).
+
+\begin{theorem}[Window theorem]\label{thm:window}
+Assume (C1) $G$ and $H$ have the same commutant on $\Sym^TV$. Let $\mathcal Y_H$ be the $H$-invariant optimal duals for $R_H$; for
+$Y\in\mathcal Y_H$ let $Z_Y=Y\otimes I-R_H\succeq0$ and $\Pi_Y$ the projector onto $\ker Z_Y$.
+(a) $P_X\ge P_H$, with equality iff some $Y\in\mathcal Y_H$ has $Z_Y-D\succeq0$.
+(b) If every $G$-invariant operator on $\ker Z_Y$ is $H$-invariant, then $\Pi_YD\Pi_Y=0$.
+(c) If the hypothesis of (b) holds for every $Y\in\mathcal Y_H$ and $(1-\Pi_Y)D\Pi_Y\ne0$ for every $Y\in\mathcal Y_H$, then
+$P_X>P_H$. (Proof idea: $\Pi_Y(Z_Y-D)\Pi_Y=0$, and a positive semidefinite operator with a vanishing diagonal block has vanishing
+off-diagonal blocks; so no optimal $H$-dual is feasible for $X$, and (a) applies.)
+(d) If some $Y$ has $\Pi_YD\Pi_Y=0$, $(1-\Pi_Y)D\Pi_Y=0$ and $\lVert(1-\Pi_Y)D(1-\Pi_Y)\rVert\le\lambda^+_{\min}(Z_Y)$, then $P_X=P_H$.
+(e) (Selection rule) $(1-\Pi_Y)D\Pi_Y$ can only receive contributions from $H$-isotypic components $\lambda\ne\mathbf1$ of the moment
+difference $M_{2T+k}(X)-M_{2T+k}(H)$ with $V_\lambda^G\ne0$ and $V_\lambda\hookrightarrow\mathrm{Hom}(\ker Z_Y,(\ker Z_Y)^\perp)$.
+\end{theorem}
+\paragraph{Actions.} Fix an orthonormal basis of $V$, write $\bar A$ for the entrywise complex conjugate and $A^{\rm t}$ for the transpose in
+this basis, and put $n=2T+k$. Each $h\in H$ acts on
+\begin{itemize}
+\item[(A1)] $V$ by $h$, and on $\bar V$ (the same vector space with the conjugate representation) by $\bar h$. Since $h$ is unitary,
+$\bar h=(h^{-1})^{\rm t}$, so $\bar V\cong V^\ast$ as $H$-modules;
+\item[(A2)] $V^{\otimes n}$ by $h^{\otimes n}$; on $\bar V^{\otimes T}\otimes V^{\otimes(T+k)}$ by $\bar h^{\otimes T}\otimes h^{\otimes(T+k)}$; on the invariant
+subspaces $\Sym^T(\bar V)$, $\Sym^{T+k}(V)$ and $\mathcal K=\Sym^T(\bar V)\otimes\Sym^{T+k}(V)$ by restriction. On $\mathcal K$ we write
+$U_h=\bar h^{\otimes T}\otimes h^{\otimes(T+k)}|_{\mathcal K}$, and on the input space $\Sym^T(\bar V)$ of $Y$ we write $\bar h_T=\bar h^{\otimes T}|_{\Sym^T(\bar V)}$;
+\item[(A3)] operators by conjugation: $\mathrm{Ad}_h(A)=h^{\otimes n}Ah^{\dagger\otimes n}$ on $\mathrm{End}(V^{\otimes n})$, $A\mapsto U_hAU_h^\dagger$ on
+$\mathrm{End}(\mathcal K)$, $Y\mapsto\bar h_TY\bar h_T^\dagger$ on $\mathrm{End}(\Sym^T\bar V)$, and, for $H$-invariant subspaces $\mathcal A,\mathcal B\subset\mathcal K$,
+$S\mapsto U_h|_{\mathcal B}\,S\,U_h|_{\mathcal A}^\dagger$ on $\mathrm{Hom}(\mathcal A,\mathcal B)$; as $H$-modules $\mathrm{Hom}(\mathcal A,\mathcal B)\cong\mathcal B\otimes\mathcal A^\ast$.
+\end{itemize}
+The same formulas with $g\in G$ define the $G$-actions. An operator is \emph{$G$-invariant} (resp.\ \emph{$H$-invariant}) if it is fixed by all
+$g\in G$ (resp.\ $h\in H$). With $u_x=\bar x^{\otimes T}\otimes x^{\otimes(T+k)}\in\mathcal K$ we have $U_hu_x=u_{hx}$ and
+$U_h(Y\otimes I)U_h^\dagger=(\bar h_TY\bar h_T^\dagger)\otimes I$. $R_X$ is $G$-invariant because $X$ is a $G$-orbit with uniform weights, and $R_H$ is
+$H$-invariant by invariance of Haar measure. For every $x=gf\in X$, right invariance of Haar measure gives
+$\int_HU_hu_xu_x^\dagger U_h^\dagger\,dh=\int_Hu_{hgf}u_{hgf}^\dagger\,dh=R_H$; averaging over $X$,
+\begin{equation}\label{eq:W-twirl}
+\int_HU_hR_XU_h^\dagger\,dh=R_H,\qquad\text{hence}\qquad\int_HU_hDU_h^\dagger\,dh=0 .
+\end{equation}
+The minima defining $P_X$ and $P_H$ are attained: a feasible $Y$ satisfies $Y\succeq0$, and $\{Y\succeq0:\tr Y\le c\}$ is compact.
+For $Y\in\mathcal Y_H$, $Z_Y=Y\otimes I-R_H$ is $H$-invariant, hence $\ker Z_Y$ and $(\ker Z_Y)^\perp$ are $H$-invariant subspaces of $\mathcal K$,
+$\Pi_Y$ commutes with every $U_h$, and $Z_Y=(1-\Pi_Y)Z_Y(1-\Pi_Y)$. Finally $Z_Y-D=Y\otimes I-R_X$, and $D$ is Hermitian.
+
+\begin{lemma}[Zero diagonal block]\label{lem:zeroblock}
+Let $M\succeq0$ on a finite-dimensional Hilbert space and let $\Pi$ be an orthogonal projection with $\Pi M\Pi=0$. Then $M\Pi=0$ and $\Pi M=0$; in
+particular $(1-\Pi)M\Pi=0$.
+\end{lemma}
+\begin{proof}
+For every vector $v$,
+\[0=\langle\Pi v,M\Pi v\rangle=\lVert M^{1/2}\Pi v\rVert^2 .\]
+So $M^{1/2}\Pi=0$, hence $M\Pi=M^{1/2}(M^{1/2}\Pi)=0$ and $\Pi M=(M\Pi)^\dagger=0$.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:window}]
+\emph{(a)} Let $Y$ attain $P_X$ and put $Y_G=\int_G\bar g_TY\bar g_T^\dagger\,dg$ (normalised Haar measure on $G$; the uniform average if $G$ is
+finite). Conjugating $Y\otimes I\succeq R_X$ by $U_g$ and using $G$-invariance of $R_X$ gives $(\bar g_TY\bar g_T^\dagger)\otimes I\succeq R_X$ for every $g$, so
+$Y_G$ is feasible for $X$, and $\tr Y_G=\tr Y=P_X$. $Y_G$ commutes with every $\bar g_T$; taking entrywise conjugates, $\overline{Y_G}$ commutes with every
+$g^{\otimes T}|_{\Sym^TV}$, so by (C1) it commutes with every $h^{\otimes T}|_{\Sym^TV}$, i.e.\ $Y_G$ commutes with every $\bar h_T$: $Y_G$ is
+$H$-invariant. Conjugating $Y_G\otimes I\succeq R_X$ by $U_h$ gives $Y_G\otimes I\succeq U_hR_XU_h^\dagger$ for every $h$; integrating and using
+\eqref{eq:W-twirl}, $Y_G\otimes I\succeq R_H$. Hence $P_H\le\tr Y_G=P_X$. If $P_X=P_H$, then $Y_G$ is an $H$-invariant optimal dual for $R_H$, i.e.\
+$Y_G\in\mathcal Y_H$, and $Z_{Y_G}-D=Y_G\otimes I-R_X\succeq0$. Conversely, if $Y\in\mathcal Y_H$ and $Z_Y-D=Y\otimes I-R_X\succeq0$, then $Y$ is
+feasible for $X$ and $P_X\le\tr Y=P_H$; with $P_X\ge P_H$ this gives equality.
+
+\emph{(b)} The compression $B:=\Pi_YD\Pi_Y|_{\ker Z_Y}\in\mathrm{End}(\ker Z_Y)$ is $G$-invariant, because $D=R_X-R_H$ is $G$-invariant and $\Pi_Y$
+commutes with every $U_g$. By hypothesis $B$ is $H$-invariant, so it equals its $H$-twirl:
+$\Pi_YD\Pi_Y=\int_HU_h\Pi_YD\Pi_YU_h^\dagger\,dh=\Pi_Y\big(\int_HU_hDU_h^\dagger dh\big)\Pi_Y=0$ by \eqref{eq:W-twirl}.
+
+\emph{(c)} Suppose $P_X=P_H$. By (a) some $Y\in\mathcal Y_H$ has $M:=Z_Y-D\succeq0$. Since $Z_Y\Pi_Y=0$ and the hypothesis of (b) holds for this $Y$,
+$\Pi_YM\Pi_Y=-\Pi_YD\Pi_Y=0$. By Lemma~\ref{lem:zeroblock}, $0=(1-\Pi_Y)M\Pi_Y=(1-\Pi_Y)Z_Y\Pi_Y-(1-\Pi_Y)D\Pi_Y=-(1-\Pi_Y)D\Pi_Y$,
+contradicting the hypothesis $(1-\Pi_Y)D\Pi_Y\ne0$. Hence $P_X\ne P_H$, and by (a) $P_X>P_H$.
+
+\emph{(d)} (Here $Y\in\mathcal Y_H$, as implicit in the notation $Z_Y,\Pi_Y$.) With respect to $\mathcal K=\ker Z_Y\oplus(\ker Z_Y)^\perp$, $Z_Y$ is block
+diagonal with blocks $0$ and $Z_Y^\perp:=(1-\Pi_Y)Z_Y(1-\Pi_Y)$; the hypotheses give $\Pi_YD\Pi_Y=0$ and $(1-\Pi_Y)D\Pi_Y=0$, hence also
+$\Pi_YD(1-\Pi_Y)=((1-\Pi_Y)D\Pi_Y)^\dagger=0$. So $Z_Y-D$ is block diagonal with blocks $0$ and $Z_Y^\perp-(1-\Pi_Y)D(1-\Pi_Y)$. On $(\ker Z_Y)^\perp$,
+$Z_Y^\perp\succeq\lambda^+_{\min}(Z_Y)$ and $(1-\Pi_Y)D(1-\Pi_Y)\preceq\lVert(1-\Pi_Y)D(1-\Pi_Y)\rVert\le\lambda^+_{\min}(Z_Y)$, so the second block is PSD.
+Thus $Z_Y-D\succeq0$, and (a) gives $P_X=P_H$.
+
+\emph{(e)} Let $M_n(X)=\E_{x\in X}(xx^\dagger)^{\otimes n}$ and $M_n(H)=\int_H(hf\,(hf)^\dagger)^{\otimes n}dh$ in $\mathrm{End}(V^{\otimes n})$, and
+$m=M_n(X)-M_n(H)$. Let $\tau_T$ be the transpose on the first $T$ tensor factors, $\tau_T(A_1\otimes A_2)=A_1^{\rm t}\otimes A_2$ for
+$A_1\in\mathrm{End}(V^{\otimes T})$, $A_2\in\mathrm{End}(V^{\otimes(T+k)})$, extended linearly; we read its output as an operator on
+$\bar V^{\otimes T}\otimes V^{\otimes(T+k)}$ (same underlying space and basis). Let $P_{\mathcal K}$ be the orthogonal projection onto $\mathcal K$ and
+$\mathcal L(A)=P_{\mathcal K}\,\tau_T(A)\,P_{\mathcal K}$, viewed in $\mathrm{End}(\mathcal K)$.
+
+\emph{$D=\mathcal L(m)$.} $(xx^\dagger)^{\rm t}=\bar x\bar x^\dagger$, so $\tau_T((xx^\dagger)^{\otimes n})=u_xu_x^\dagger$, which already lives on $\mathcal K$; by linearity
+(and continuity, for the Haar integral) $\mathcal L(M_n(X))=R_X$, $\mathcal L(M_n(H))=R_H$, and $D=\mathcal L(m)$.
+
+\emph{Equivariance.} For product operators, $(hA_1h^\dagger)^{\rm t}=\bar h\,A_1^{\rm t}\,h^{\rm t}=\bar hA_1^{\rm t}\bar h^\dagger$ (as $h^{\rm t}=\bar h^\dagger$), so
+$\tau_T(\mathrm{Ad}_h A)=(\bar h^{\otimes T}\otimes h^{\otimes(T+k)})\,\tau_T(A)\,(\bar h^{\otimes T}\otimes h^{\otimes(T+k)})^\dagger$ for all $A$ by linearity. $\mathcal K$ is
+invariant under the unitary $\bar h^{\otimes T}\otimes h^{\otimes(T+k)}$, so $P_{\mathcal K}$ commutes with it, and $\mathcal L(\mathrm{Ad}_hA)=U_h\mathcal L(A)U_h^\dagger$.
+For $Y\in\mathcal Y_H$ define $\Phi_Y:\mathrm{End}(V^{\otimes n})\to\mathrm{Hom}(\ker Z_Y,(\ker Z_Y)^\perp)$, $\Phi_Y(A)=(1-\Pi_Y)\mathcal L(A)|_{\ker Z_Y}$. Since $\Pi_Y$
+commutes with $U_h$,
+\[
+\Phi_Y(\mathrm{Ad}_hA)=(1-\Pi_Y)U_h\mathcal L(A)U_h^\dagger\Pi_Y=U_h|_{(\ker Z_Y)^\perp}\,\Phi_Y(A)\,U_h|_{\ker Z_Y}^\dagger ,
+\]
+i.e.\ $\Phi_Y$ is $H$-equivariant for the actions (A3), and $(1-\Pi_Y)D\Pi_Y=\Phi_Y(m)$ (extended by $0$ on $(\ker Z_Y)^\perp$).
+
+\emph{Isotypic decomposition with multiplicities.} $H$ is compact, so the finite-dimensional modules $\mathcal E=\mathrm{End}(V^{\otimes n})$ and
+$\mathcal H_Y=\mathrm{Hom}(\ker Z_Y,(\ker Z_Y)^\perp)\cong(\ker Z_Y)^\perp\otimes(\ker Z_Y)^\ast$ decompose into isotypic components,
+$\mathcal E=\bigoplus_\lambda\mathcal E_\lambda$ with $\mathcal E_\lambda\cong V_\lambda\otimes\C^{\mu_\lambda}$, and similarly $\mathcal H_Y=\bigoplus_\lambda(\mathcal H_Y)_\lambda$; the
+isotypic projections $P_\lambda$ are $H$-equivariant (they are $\int_H\overline{\chi_\lambda(h)}\dim V_\lambda\,\mathrm{Ad}_h\,dh$). By Schur's lemma, an equivariant
+map sends $\mathcal E_\lambda$ into $(\mathcal H_Y)_\lambda$, whatever the multiplicities: restricted to any irreducible summand $\cong V_\lambda$ of $\mathcal E_\lambda$, its
+components into the irreducible summands of $\mathcal H_Y$ vanish unless they are $\cong V_\lambda$. Hence $\Phi_Y(m_\lambda)=0$ unless
+$V_\lambda\hookrightarrow\mathcal H_Y$, where $m_\lambda=P_\lambda m$. The dual $(\ker Z_Y)^\ast$ enters only through this Hom space; for self-dual $H$-modules
+(e.g.\ all $SU(2)$- and $SO(4)$-modules) $(\ker Z_Y)^\ast\cong\ker Z_Y$.
+
+\emph{Trivial component.} $P_{\mathbf 1}=\int_H\mathrm{Ad}_h\,dh$, and $P_{\mathbf 1}M_n(X)=M_n(H)$ by the argument of \eqref{eq:W-twirl} (each $x\in X$ lies in
+$H\cdot f$), while $P_{\mathbf 1}M_n(H)=M_n(H)$; so $m_{\mathbf 1}=0$.
+
+\emph{$G$-fixed vectors.} $M_n(X)$ is $\mathrm{Ad}_G$-invariant and $M_n(H)$ is $\mathrm{Ad}_H$-invariant, so $m$ is $G$-fixed; $P_\lambda$ commutes with
+$\mathrm{Ad}_g$, so $m_\lambda$ is a $G$-fixed vector of $\mathcal E_\lambda\cong V_\lambda\otimes\C^{\mu_\lambda}$, whose $G$-fixed space is $V_\lambda^G\otimes\C^{\mu_\lambda}$.
+Hence $m_\lambda\ne0$ requires $V_\lambda^G\ne0$.
+
+Therefore $(1-\Pi_Y)D\Pi_Y=\sum_\lambda\Phi_Y(m_\lambda)$ only receives contributions from $\lambda\ne\mathbf 1$ with $V_\lambda^G\ne0$ and
+$V_\lambda\hookrightarrow\mathrm{Hom}(\ker Z_Y,(\ker Z_Y)^\perp)$. Since $m=M_{2T+k}(X)-M_{2T+k}(H)$, this is (e).
+\end{proof}
+
+\begin{corollary}[W-SU(2)]\label{cor:WSU2}
+Let $H=SU(2)$ act on $V=V_j$ (spin $j$), $G\le H$ closed, and let $Y\in\mathcal Y_H$ with $\ker Z_Y$ spin-$s$ isotypic. Then
+$(1-\Pi_Y)D\Pi_Y$ only receives contributions from spins $L$ with $1\le L\le\min\{2j(2T+k),\ s+j(2T+k)\}$ and $V_L^G\ne0$.
+\end{corollary}
+\begin{proof}
+$V_j^{\otimes n}$ contains only spins $\le jn$, so $\mathrm{End}(V_j^{\otimes n})\cong V_j^{\otimes n}\otimes(V_j^{\otimes n})^*$ contains only spins
+$L\le2jn$ (every $SU(2)$-irreducible is self-dual). $\bar V_j\cong V_j^\ast\cong V_j$, so $\mathcal K\subset\bar V_j^{\otimes T}\otimes V_j^{\otimes(T+k)}$ contains only
+spins $p\le jn$, and so does $(\ker Z_Y)^\perp$. Write $\ker Z_Y\cong V_s\otimes\C^\mu$ and $(\ker Z_Y)^\perp\cong\bigoplus_pV_p\otimes\C^{\nu_p}$; then
+$\mathrm{Hom}(\ker Z_Y,(\ker Z_Y)^\perp)\cong\bigoplus_p(V_p\otimes V_s^\ast)\otimes\C^{\mu\nu_p}$, and multiplicities create no new irreducibles. By the
+triangle rule, $V_L\hookrightarrow V_p\otimes V_s^\ast\cong V_p\otimes V_s$ requires $L\le s+p\le s+jn$. $L=0$
+is excluded by (e). Apply Theorem~\ref{thm:window}(e). (No use of (C1).)
+\end{proof}
+
+\begin{corollary}[W-O(4)]\label{cor:WO4}
+Let $H=O(4)$ act on $V=\C^4$ by its defining real orthogonal representation, let $f\in\mathbb{R}^4$ be a real unit vector and $G\le O(4)$ finite,
+and suppose $X=G\cdot f\subset S^3$ is a spherical $t$-design. Let $Y\in\mathcal Y_H$ and suppose $\ker Z_Y$ is isotypic, as an
+$SO(4)$-module, of type $(a,b)$ under $SO(4)\cong(SU(2)\times SU(2))/\{\pm1\}$. Then $(1-\Pi_Y)D\Pi_Y=\sum_\ell(1-\Pi_Y)\mathcal L(m_\ell)\Pi_Y$,
+where the sum runs over even $\ell$ with
+\[
+t<\ell\le2(2T+k),\qquad\ell\le2\min(a,b)+2T+k,
+\]
+and $m_\ell$ is the degree-$\ell$ spherical-harmonic part of $m$ defined in the proof. In particular, if no even $\ell$ satisfies both
+bounds, then $(1-\Pi_Y)D\Pi_Y=0$.
+\end{corollary}
+\begin{proof}
+\emph{Step 1 (harmonic parts of $m$).} For real $x$, $xx^\dagger=xx^{\rm t}$ and $\phi(x):=(xx^{\rm t})^{\otimes n}$ has entries that are
+homogeneous polynomials of degree $2n$ in $x$. On $S^3$ each entry decomposes into spherical harmonics of degrees $\ell\le2n$, $\ell$ even
+(the entries are even functions); write $\phi=\sum_\ell\phi_\ell$ entrywise. Since $O(4)$ commutes with the harmonic projections and
+$\phi(hx)=h^{\otimes n}\phi(x)h^{{\rm t}\otimes n}$, also $\phi_\ell(hx)=h^{\otimes n}\phi_\ell(x)h^{{\rm t}\otimes n}$. $O(4)$ acts
+transitively on $S^3$, so $M_n(H)=\int_{S^3}\phi\,d\sigma$, and $m=\sum_\ell m_\ell$ with
+$m_\ell:=\E_X\phi_\ell-\int_{S^3}\phi_\ell\,d\sigma$. For $\ell\ge1$, $\int\phi_\ell\,d\sigma=0$; for $1\le\ell\le t$, $\E_X\phi_\ell=0$
+by the design property; and $m_0=0$. So $m=\sum_{t<\ell\le2n,\ \ell\ \rm even}m_\ell$ with $m_\ell=\E_X\phi_\ell$. Let
+$\mathcal H_\ell$ be the space of degree-$\ell$ harmonics, $Z^{(\ell)}_y\in\mathcal H_\ell$ the reproducing kernel at $y$, and
+$\Psi_\ell(p)=\int_{S^3}p(x)\phi(x)\,d\sigma(x)$ for $p\in\mathcal H_\ell$. $\Psi_\ell$ is $SO(4)$-equivariant and
+$\phi_\ell(y)=\Psi_\ell(Z^{(\ell)}_y)$, so $m_\ell=\Psi_\ell(\E_XZ^{(\ell)}_y)\in\Psi_\ell(\mathcal H_\ell)$. Since
+$\mathcal H_\ell\cong(\ell/2,\ell/2)$ is an irreducible $SO(4)$-module, $m_\ell$ lies in the $(\ell/2,\ell/2)$-isotypic component.
+
+\emph{Step 2 (types in $\mathcal K$).} $V\otimes_{\mathbb R}\C$ is $(\tfrac12,\tfrac12)$, and $\Sym^i(\C^4)=\bigoplus_{i'\le i,\ i'\equiv i\ (2)}\mathcal H_{i'}\cong
+\bigoplus(i'/2,i'/2)$. $\bar V\cong V$, so by Clebsch--Gordan in each $SU(2)$ factor $\mathcal K=\Sym^T(\bar V)\otimes\Sym^{T+k}(V)$ contains only
+types $(p,p')$ with $p,p'\le(T+T+k)/2=n/2$; so does $(\ker Z_Y)^\perp\subset\mathcal K$.
+
+\emph{Step 3 (the Hom space).} The map $\Phi_Y$ of the proof of (e) is $O(4)$-equivariant, hence $SO(4)$-equivariant, so by the Schur argument
+of (e) (applied to $SO(4)$, with multiplicities) it kills $m_\ell$ unless $(\ell/2,\ell/2)\hookrightarrow\mathrm{Hom}(\ker Z_Y,(\ker Z_Y)^\perp)\cong(\ker Z_Y)^*\otimes(\ker Z_Y)^\perp$.
+$SU(2)$-irreducibles are self-dual, so $(a,b)^*\cong(a,b)$, and $(\ell/2,\ell/2)\hookrightarrow(a,b)\otimes(p,p')$ requires
+$\ell/2\le a+p$ and $\ell/2\le b+p'$. With $p,p'\le n/2$ this gives $\ell\le2\min(a,b)+n$.
+\end{proof}
+
+\begin{remark}
+Corollaries~\ref{cor:WSU2} and~\ref{cor:WO4} only restrict where $(1-\Pi_Y)D\Pi_Y$ can be nonzero. To conclude $P_X=P_H$ one still needs
+(b) (or $\Pi_YD\Pi_Y=0$ directly) and the norm condition of (d). Applying them to a concrete orbit (e.g.\ the $O(4)$ row of Table~\ref{tab:nonab}) requires $Y$ and the type of $\ker Z_Y$, which
+were obtained numerically [Num]. In the five $O(4)$ tests of the research phase the computed window degrees $4,6,8,8,8$ equal
+$2\min(a,b)+2T+k$ and lie below the first surviving harmonic ($6$ for the $F_4$ orbit, $12$ for the $H_4$ orbit).
+\end{remark}
+
+\begin{table}[t]\centering
+\caption{Finite-orbit tests at matched $(T+k)$-th moment (genuine cases: Lemma~\ref{lem:B} is not tight).}\label{tab:nonab}
+\begin{tabular}{llccl}\toprule
+$H$ / fiducial & $G$-orbit & $(T,k)$ & $P_X-P_H$ & status\\\midrule
+$SO(3)$, real $\ket{1,0}$ & 6 icosahedral axes & (1,1) & $<10^{-13}$ & pass\\
+$SO(3)$, real $\ket{1,0}$ & 30-line icosahedral orbit & (2,1) & $<10^{-12}$ & pass\\
+$SO(3)$, real $\ket{1,0}$ & 30-line icosahedral orbit & (1,3) & $<10^{-11}$ & pass\\
+$SU(2)$, spin $3/2$ GHZ-like & icosahedral (tuned) & (1,1) & $<10^{-12}$ & pass ($P=31/70$)\\
+$O(4)$, real & 24-cell & (1,1) & $<10^{-8}$ & pass\\
+$SU(2)$, spin 1 (via $SO(3)$) & octahedral (tuned) & (1,1) & $\ge6.437\times10^{-4}$ & fail (certified)\\
+$SU(2)$, spin $5/2$ & binary icosahedral (tuned) & (1,1) & $1.1$--$8.8\times10^{-4}$ & fail (predicted by Thm.~\ref{thm:window})\\
+$SU(3)$, $\Sym^2\C^3$ & Hessian (tuned) & (1,1) & $\ge8.0399\times10^{-4}$ & fail (certified)\\\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Related work}\label{sec:related}
+
+\paragraph{Optimal cloning for continuous families.}
+Werner~\cite{Werner1998} constructed the unique optimal $N\to M$ cloner for pure $d$-level states under global fidelity.
+For equatorial (phase) states, Bru\ss{} \emph{et al.}~\cite{Bruss2000} bounded the $N\to M$ fidelity via phase estimation and gave the optimal $1\to2$ qubit machine;
+Fan \emph{et al.}~\cite{Fan2003} obtained the optimal $1\to2$ phase-covariant cloner for qudits under single-qudit fidelity;
+and Buscemi, D'Ariano and Macchiavello~\cite{Buscemi2005} derived the optimal $N\to M$ phase-covariant cloner for $M=kd+N$ (their $k$ is an integer multiplier, not our number of extra copies), optimal for both global and single-qudit fidelity.
+Kim and Chitambar~\cite{KimChitambar2022} computed the optimal global (process) fidelity of phase-covariant cloning by semidefinite programming, with closed form $(2d-1)/d^{2}$ for $1\to2$, and asked for a $1\to M$ formula.
+That formula, and in fact the optimal $N\to N+K$ phase-state cloner for all $d,N,K$, is now given by Herasymenko, Lin, Verduyn Lunel and Grinko~\cite[Thm.~II.3 and Thm.~X.1, Eq.~(16)]{Herasymenko2026}.
+In particular the $T=1$ torus values, $(k+1)!(2d-k)/(2d^{k+1})$ for $k\le d$, are the $N=1$ case of their Eq.~(16); we use their result for the torus value and for the singleton case of Proposition~\ref{prop:reduction}, and claim no novelty for it.
+Asymptotic and asymmetric variants are treated by Chiribella and Yang~\cite{ChiribellaYang2014}, who relate optimal asymptotic cloners to state estimation for, among others, phase- and multiphase-covariant families, and by Kay~\cite{Kay2016} for universal cloning.
+\emph{Difference.} All of these works optimise over the full continuous orbit (the torus of phases, or the unitary group).
+We ask a different question: which \emph{finite} phase codebooks $\{\psi_x\}_{x\in\mathbb{Z}_q}$ with key set $K\subset\mathbb{Z}_q$ attain the torus value $P_{\mathrm{torus}}$ exactly.
+
+\paragraph{Finite sets that reproduce a continuous optimum.}
+The closest precedent is Jing \emph{et al.}~\cite{Jing2012}: three equally spaced equatorial qubit states determine the phase-covariant cloner, and four tetrahedral states determine the universal one.
+Their statement is for qubits and single-copy fidelity.
+For $d=2$, $T=k=1$, our sufficiency result gives the same conclusion under global fidelity, since $\{0,1\}\subset\mathbb{Z}_3$ is a $B_2$ set.
+Our necessity statement (Theorem~\ref{thm:sidon}: Sidon is required at $(T,k)=(1,1)$) holds \emph{for global fidelity only} and does not transfer to single-copy fidelity, where Jing \emph{et al.} report that three states suffice for all $1\to n$. For larger $(T,k)$ we prove sufficiency of $B_{T+k}$ only; necessity is open.
+\'Cwikli\'nski and Studzi\'nski~\cite{CwiklinskiStudzinski2026} use moment matching in the opposite direction: when the second moment of an orbit equals the Haar moment, the orbit is a continuous 2-design and local cloning reduces to universal cloning.
+Herasymenko \emph{et al.}~\cite{Herasymenko2026} show that stabilizer states are not a resolving orbit by a 4-copy frame-potential computation; Gross, Nezami and Walter~\cite{GrossNezamiWalter2021} supply the Clifford-group Schur--Weyl duality that controls such stabilizer moments.
+\emph{Difference.} We give (i) an exact finite-codebook criterion on the torus: $B_{T+k}$ index sets attain $P_{\mathrm{torus}}$, proved for $d=2$ and for $T\le3$ (all $d,k$), with an if-and-only-if (Sidon) characterisation at $(T,k)=(1,1)$; and (ii) a window theorem (Theorem~\ref{thm:window}) for finite orbits of compact groups, with two computer-assisted counterexamples (SU(3) on $\mathrm{Sym}^2\mathbb{C}^3$ with the Hessian group, and spin-1 with the octahedral group) showing that the finite-subgroup analogue fails beyond tori.
+We found no prior finite-orbit failure theorem or window criterion.
+
+\paragraph{Quantum fingerprinting and hashing.}
+Buhrman, Cleve, Watrous and de~Wolf~\cite{Buhrman2001} introduced quantum fingerprints that are exponentially shorter than the strings they encode; Gottesman and Chuang~\cite{GottesmanChuang2001} built unconditionally secure quantum digital signatures from quantum public keys, whose security requires that only a limited number of copies circulate.
+Gavinsky and Ito~\cite{GavinskyIto2013} constructed \emph{hiding} quantum fingerprints that reveal $o(\min\{n,\log(1/\varepsilon)\})$ bits.
+Ablayev and Vasiliev~\cite{AblayevVasiliev2014} introduced cryptographic quantum hashing with a Fourier-controlled key set and a trigonometric (qubit-rotation) encoding; Vasiliev~\cite{Vasiliev2016} formulated the character-based phase encoding $\frac1{\sqrt d}\sum_j e^{2\pi i s_jx/q}\lvert j\rangle$ for finite abelian groups, which is exactly our state family, with an $\varepsilon$-biased key set $S\subset\mathbb{Z}_q$ giving collision resistance (see also the review~\cite{Ablayev2025}); Ziiatdinov~\cite{Ziiatdinov2016} extends the construction to arbitrary groups.
+Hatanaka \emph{et al.}~\cite{Hatanaka2024} propose a photonic hash based on Gaussian boson sampling.
+Adaptive attacks on Wiesner money~\cite{Nagaj2016} illustrate how copying and verification interact in practice.
+\emph{Difference.} These works use Fourier bias, i.e.\ near-orthogonality, for collision resistance.
+None of them analyses optimal \emph{cloning} of the key-set states, and none uses a Sidon or $B_h$ condition.
+Our results give the corresponding copy-resistance statement: for $B_{T+k}$ key sets, an adversary holding $T$ copies does no better at producing $T+k$ copies (in global fidelity) than against the full phase torus.
+
+\paragraph{Sidon sets, difference sets and their uses in quantum information.}
+Sidon ($B_2$) sets go back to Erd\H{o}s and Tur\'an~\cite{ErdosTuran1941}.
+Singer~\cite{Singer1938} gave perfect difference sets modulo $q^2+q+1$, and Bose and Chowla~\cite{BoseChowla1962} extended these results to $B_h$ sequences.
+Katz's character-sum estimate~\cite{Katz1989} bounds $\lvert\sum_{t\in F}\chi(t-x)\rvert\le(n-1)\sqrt{\#F}$ for $x$ of degree $n$ over $F$; it controls the Fourier bias of Bose--Chowla-type sets, which we use in the Discussion.
+O'Bryant's survey~\cite{OBryant2004} is the standard bibliography.
+In quantum information, Bertoni, Mereghetti and Palano~\cite{BertoniMereghettiPalano2003} used Golomb rulers and difference sets to minimise the size of one-way quantum finite automata, and Aydin, Albert and Barg~\cite{AydinAlbertBarg2026} built $\ell_1$ codes, and hence spin, bosonic and permutation-invariant quantum codes, from $t$-Sidon sets and Tverberg partitions.
+Vitelli \emph{et al.}~\cite{Vitelli2013} realised quantum state fusion of two photonic qubits into one ququart.
+\emph{Difference.} In \cite{BertoniMereghettiPalano2003,AydinAlbertBarg2026} the additive structure serves automaton size or code distance.
+Here it is the exact condition for finite codebooks to attain optimal cloning.
+Our identity between the optimal fusion fidelity of phase states and the additive energy of the key set (Theorem~\ref{thm:fusion}) has no counterpart in~\cite{Vitelli2013}, which is a physical protocol.
+The multiset Johnson-type packing bound used in the proofs of Theorem~\ref{thm:packing}(c,d) is a packing statement; it is not the Erd\H{o}s--Ko--Rado bound for intersecting multiset families of Meagher and Purdy~\cite{MeagherPurdy2011}, which goes in the opposite direction.
+
+\section{Discussion}
+For quantum hashing and copy-bounded quantum tokens, our results replace the bias heuristic by an exact criterion: at $(T,k)=(1,1)$ a phase codebook is as hard to counterfeit as the full torus exactly when its key set is Sidon, and for larger
+$(T,k)$ the absence of additive coincidences of order $T+k$ ($B_{T+k}$) suffices (proved for $d=2$ and for $T\le3$; conjectured in
+general); whether it is also necessary is open. Bose--Chowla sets~\cite{BoseChowla1962} are $B_h$ with small bias~\cite{Katz1989}, but they are not efficiently
+indexable on qubit registers, and the scheme remains malleable and vulnerable to verification-oracle attacks; these results are
+information-theoretic statements about copy-bounded security, not a deployable primitive.
+\paragraph{Open problems.} (1) Conjecture~\ref{conj:TT} for $T\ge4$; the certified margin $1-\max\rho\approx2.9/T^2$ at $d=3$ shows that a proof
+must be sharp in $T$. (2) Exact conditions for $T\ge2$: Theorem~\ref{thm:t1iff} settles $T=1$ (and shows that $B_{T+k}$ is not necessary); is there an analogous
+characterisation for $T\ge2$, and does Conjecture~\ref{conj:t1H} hold for all $(d,k)$? (3) A necessary-and-sufficient form of
+Theorem~\ref{thm:window}, i.e.\ a characterisation of the finite orbits whose cloning value equals that of the continuous orbit. (4) Codebooks
+over other finite abelian groups (e.g.\ $\Z_q^r$), and cloning figures of merit other than global fidelity.
+
+\section*{Use of AI tools}
+This work made substantial use of four AI systems.
+\begin{itemize}
+\item \textbf{Grok Bot} (xAI's agent platform, launched on the Grok~4.6 model; used October 2026) was used throughout the research phase. It proposed and drafted proofs
+(the reduction to the packing inequality, the packing inequality for $d=2$ and $T\le3$, the fusion theorems, the $T=1$ characterisation and the window theorem),
+wrote exploratory numerical code and the certificate generators, wrote the standalone exact, interval and ball-arithmetic checkers of
+Appendix~\ref{app:ca}, and ran literature and prior-art searches.
+\item \textbf{Claude} (Anthropic; Claude Opus 5.5) co-developed research directions and conjectures, independently re-implemented
+and audited every computational claim in a separate code base (QH-Lab~\cite{QHLab}), re-ran every certificate checker, verified
+every bibliographic entry against Crossref and arXiv, and drafted and edited the manuscript.
+\item \textbf{ChatGPT} (OpenAI; GPT-6 Luna, the ChatGPT Free model since 8 October 2026; used 16 October 2026) served as an independent referee of the draft, re-ran the standard-library certificate checkers, and gave an independent proof of
+Theorem~\ref{thm:fusionm}, and \textbf{Perplexity}
+(Perplexity Pro with the GPT-6.1 Sol model) as an independent prior-art and citation-fidelity checker. Every issue they raised was adjudicated by
+recomputation or by a written proof before any change was made.
+\end{itemize}
+The outputs were verified as follows. (1) Every computer-assisted step is checked by a standalone program that uses only exact
+rational, interval or ball arithmetic and no optimisation solver; floating-point and solver outputs serve only as certificate data.
+(2) The complete certificate package was re-run independently: the archive hash and all 32 internal hashes matched, and every output
+was identical to the shipped expected output. (3) The values in Tables~\ref{tab:torus}--\ref{tab:nonab} and in the negative-results tables, the worked examples, the $m$-fold fusion values
+and the $T=1$ characterisation (on random key sets) were reproduced by an independent implementation (QH-Lab), together with floating-point spot checks of the torus theorem at $T=2$ ($d\le20$) and $T=3$ ($d\le8$), which agree with the
+torus value to within $10^{-9}$. (4) The pen-and-paper arguments were reviewed line by line by Claude against the research record, and by two independent ChatGPT
+referee passes on successive drafts; the author read the complete manuscript.
+(5) Every reference was checked against its arXiv or DOI landing page.
+The author takes full responsibility for the content of this paper, including all text and results produced with AI assistance.
+
+\section*{Data and code availability}
+All code needed to verify the computer-assisted steps is provided as arXiv ancillary files and in the Zenodo record that accompanies
+this paper~\cite{QHLab} (code under the MIT licence). The archive \texttt{ca\_appendix.zip} has SHA-256
+\texttt{e77e131bdd7becb0822ed582ccfc0a9e43b4b9183aeab37e65bec3e64d888b30}; the separate coverage audit \texttt{coverage\_check.py} has SHA-256
+\texttt{c42d11f652ed0bdd7daec55dd4bb9940319a8ff138c7f7d59956eacfa9ef0995}. The values in the negative-results tables are reproduced by
+QH-Lab's \texttt{tools/neg\_table\_check.py}. Verification requires Python $\ge3.10$,
+\texttt{mpmath} and \texttt{python-flint} 0.9.0. No other data were generated or analysed.
+
+\section*{Author contributions}
+M.~Weldon is the sole author. He conceived the project, directed the research and its multi-system verification workflow, read and
+approved the final manuscript, and takes responsibility for its content, with AI assistance as described above.
+
+\section*{Competing interests}
+The author declares no competing interests. This work received no external funding.
+
+\bibliographystyle{unsrtnat}
+\bibliography{refs}
+
+\appendix
+\providecommand{\Mb}{\mathrm{Mb}}
+\providecommand{\ov}{\mathrm{ov}}
+\providecommand{\checker}[1]{\textsf{[CA:~\nolinkurl{#1}]}}
+\section{Proof of the packing inequality (Theorem~\ref{thm:packing})}\label{app:proofs}
+
+\paragraph{Notation and scope.} Throughout, $N=T+k$. A \emph{shift} is $\Delta\in\Z^d$ with $\sum_i\Delta_i=k$; $\Delta=\Delta^+-\Delta^-$ with
+$\Delta^\pm\ge0$ of disjoint supports, and $n(\Delta)=|\Delta^-|$. The \emph{support} of $\Delta$ is $\mathcal D_\Delta=\{b:|b|=T,\ b\ge\Delta^-\}$
+(this is $\mathcal D_{\Delta}$ of~\cite[Eq.~(111)]{Herasymenko2026}) and its \emph{outputs} are $b+\Delta$, $b\in\mathcal D_\Delta$.
+A \emph{family} is a finite set $F$ of shifts with $n(\Delta)\le T$ for all $\Delta\in F$ that pairwise satisfy
+\[
+\text{(ii)}\qquad\lVert\Delta-\Delta'\rVert_1\ge2(T+k+1).
+\]
+For $x,y\in\Z_{\ge0}^d$: $|x|=\sum_ix_i$, $\ov(x,y)=\sum_i\min(x_i,y_i)$, $\mult(x)=|x|!/\prod_ix_i!$. $\Mb(M,\ell)$ is the largest multinomial
+$\mult(x)$ over $x$ with $|x|=M$ and at most $\ell$ nonzero coordinates (attained by the balanced vector), $M^\ast=\Mb(N,d)$, and
+$R_m=m!/m^m$. We write $c_b=\mult(b)$ for $|b|=T$, so $a_b=\sqrt{c_b/Z_b}$. The tag \checker{path} marks a step certified by the named
+standalone checker of Appendix~\ref{app:ca} (paths relative to \texttt{ca\_appendix/}); every other step is proved in the text.
+
+\begin{remark}[Scope of ``family'']\label{rem:famscope}
+A shift with $n(\Delta)>T$ has $\mathcal D_\Delta=\emptyset$ and $\Lambda(\Delta)=0$, and it can be at distance $\ge2(T+k+1)$ from a balanced $g$;
+e.g.\ $d=3$, $T=k=1$, $g=(1,0,0)$, $\Delta'=(-1,-1,3)$, $\lVert g-\Delta'\rVert_1=6$. Then $\rho(\{g,\Delta'\})=1$. So parts (b)--(d) of
+Theorem~\ref{thm:packing} (and the strict inequality of Conjecture~\ref{conj:TT}) hold only for families with $n(\Delta)\le T$, which is how they
+are proved here; for Proposition~\ref{prop:reduction} the restriction is harmless, since members with $\Lambda=0$ do not change $\rho$.
+Part (a) is proved below without the restriction.
+\end{remark}
+
+\subsection{Common lemmas}
+
+\begin{lemma}[Normalisation, Lemma N]\label{lem:N}
+Let $\mathrm{avg}_b=|C|^{-1}\sum_{g\in C}\mult(b+g)$, $\theta_b=\sqrt{c_b/\mathrm{avg}_b}$ and $W=\sum_{|b|=T}\sqrt{c_b\,\mathrm{avg}_b}$. Then for
+every finite set $F$ of shifts
+\[
+\rho(F)=\frac1W\sum_{\Delta\in F}\ \sum_{b\in\mathcal D_\Delta}\theta_b\,\mult(b+\Delta).
+\]
+\end{lemma}
+\begin{proof}
+$Z_b=|C|\,\mathrm{avg}_b$, so $a_b=\theta_b/\sqrt{|C|}$. The $a_b$ are $S_d$-invariant and $C$ is one $S_d$-orbit, so $\Lambda(g)=\Lambda_0$ for
+all $g\in C$; averaging over $C$, $\Lambda_0=\sum_ba_b\,\mathrm{avg}_b=|C|^{-1/2}\sum_b\theta_b\mathrm{avg}_b=W/\sqrt{|C|}$. Divide
+$\sum_F\Lambda(\Delta)=|C|^{-1/2}\sum_F\sum_{b}\theta_b\mult(b+\Delta)$ by $\Lambda_0$.
+\end{proof}
+Write $\kappa_b=\mathrm{avg}_b/M^\ast$. Then $\theta_b\mult(\cdot)/W=\sqrt{c_b/\kappa_b}\,(\mult(\cdot)/M^\ast)\big/\sum_b\sqrt{c_b\kappa_b}$, so all
+bounds below may be computed in units of $M^\ast$ with $\theta_b=\sqrt{c_b/\kappa_b}$ and $W=\sum_b\sqrt{c_b\kappa_b}$.
+
+\begin{lemma}[Structure, Lemma S]\label{lem:S}
+For shifts $\Delta,\Delta'$ with $n=n(\Delta)$, $n'=n(\Delta')$: $\lVert\Delta\rVert_1=k+2n$, and
+$\lVert\Delta-\Delta'\rVert_1=\lVert\Delta\rVert_1+\lVert\Delta'\rVert_1-2\ov(\Delta^+,\Delta'^+)-2\ov(\Delta^-,\Delta'^-)$. Hence
+\[
+\text{(ii)}\iff\ov(\Delta^+,\Delta'^+)+\ov(\Delta^-,\Delta'^-)\le n+n'-T-1 .
+\]
+Consequently, in a family: (S1) every pair has $n+n'\ge T+1$; (S2) at most one member has $n\le T/2$; (S3) if $|F|\ge2$, every member has
+$n\ge1$; (S4) a member with $n=T$ is \emph{pinned}: $\mathcal D_\Delta=\{\Delta^-\}$; (S5) supports of distinct members are disjoint and
+outputs of distinct members are distinct.
+\end{lemma}
+\begin{proof}
+$|\Delta^+|-|\Delta^-|=k$ gives $\lVert\Delta\rVert_1=|\Delta^+|+|\Delta^-|=k+2n$. For integers $x=x^+-x^-$, $y=y^+-y^-$ with
+$x^+x^-=y^+y^-=0$ one checks $|x-y|=|x|+|y|-2\min(x^+,y^+)-2\min(x^-,y^-)$ (if $x,y\ge0$ this is $|x-y|=x+y-2\min(x,y)$; if $x\ge0\ge y$
+both minima vanish; the other cases are symmetric). Summing over coordinates gives the identity, and substituting into (ii) the
+equivalence. (S1): the left side is $\ge0$. (S2): two members with $n,n'\le T/2$ would have $n+n'\le T$. (S3): by (S1) a partner of a
+member with $n=0$ has $n'\ge T+1$, which is excluded in a family. (S4): $b\ge\Delta^-$ and $|b|=T=|\Delta^-|$ force $b=\Delta^-$. (S5): if
+$b\in\mathcal D_\Delta\cap\mathcal D_{\Delta'}$, then $\beta=b+\Delta$, $\beta'=b+\Delta'$ are nonnegative with $|\beta|=|\beta'|=N$, so
+$\lVert\Delta-\Delta'\rVert_1=\lVert\beta-\beta'\rVert_1\le2N$, contradicting (ii); if $b+\Delta=b'+\Delta'$, then
+$\lVert\Delta-\Delta'\rVert_1=\lVert b'-b\rVert_1\le2T$, again a contradiction.
+\end{proof}
+
+\begin{lemma}[Multinomial moves, Lemma M]\label{lem:M}
+Moving one unit from a coordinate of value $a$ to one of value $c$ multiplies $\mult$ by $a/(c+1)$. Consequently:
+\begin{enumerate}
+\item[(M1)] (Doubling) If $M>\ell$ and $\ell<d$, then $\Mb(M,\ell+1)\ge2\Mb(M,\ell)$. Hence $\Mb(N,\ell)\le M^\ast2^{\ell-d}$ for $\ell\le d\le N$,
+and $\Mb(M,\ell)\le M!\,2^{\ell-M}$ for $1\le\ell\le M$.
+\item[(M2)] (Filling) Let $m=\lfloor N/d\rfloor$ and let $|x|=N$ with some coordinate $x_z=t_0\le m$. Then
+$\mult(x)/M^\ast\le m!/(t_0!\,m^{m-t_0})$. In particular $\Mb(N,\ell)/M^\ast\le R_m^{\,d-\ell}$ for $\ell\le d$.
+\item[(M3)] ($f$-monotonicity) For $1\le s<M$ and $s<d$: $\Mb(M,s+1)/(s+1)\ge\frac{2s}{s+1}\Mb(M,s)/s\ge\Mb(M,s)/s$.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+The move rule is immediate from the factorials. (M1) A balanced vector with $\ell$ parts summing to $M>\ell$ has a part $a\ge2$; moving one
+unit to an empty coordinate multiplies $\mult$ by $a\ge2$ and gives a vector with $\ell+1$ parts. Iterating from $\ell$ to $d$ (allowed
+since $N\ge d$) gives the first bound. For the second, a vector with $\ell\le M$ positive parts $x_i$ has $\prod x_i!\ge\prod2^{x_i-1}=2^{M-\ell}$.
+(M2) While $x_z=t<m$, the other $d-1$ coordinates sum to $N-t>N-m\ge(d-1)m$, so their maximum is $\ge m+1$; moving one unit from it to $z$
+multiplies $\mult$ by $\ge(m+1)/(t+1)\ge m/(t+1)$. After $m-t_0$ moves the vector is still of size $N$, so $\mult\le M^\ast$, i.e.\
+$\mult(x)\prod_{t=t_0}^{m-1}\frac m{t+1}\le M^\ast$, which is the claim. For the second statement, fill the $d-\ell$ empty coordinates one after
+another ($t_0=0$ each time; already filled coordinates have value $m$ and are never the donor, since the donor has value $\ge m+1$). (M3)
+By (M1), $\Mb(M,s+1)/(s+1)\ge2\Mb(M,s)/(s+1)$, and $2s\ge s+1$.
+\end{proof}
+
+\begin{lemma}[Johnson-type multiset packing, Lemma J]\label{lem:J}
+Let $s_r(P)$ be the number of distinct $r$-sub-multisets of a multiset $P$ on $[d]$. If the members of a collection of multisets pairwise
+satisfy $\ov(P,P')\le r-1$, then $\sum_Ps_r(P)\le\binom{d+r-1}{r}$. For $|P|=M$ with support size $\ell$ and $\ell_j=\#\{x:P_x\ge j\}$:
+\begin{gather*}
+s_2(P)=\tbinom\ell2+\ell_2\ge\tbinom\ell2+[M>\ell],\\
+s_3(P)=\tbinom\ell3+\ell_2(\ell-1)+\ell_3\ge\tbinom\ell3+(\ell-1)[M>\ell]+[M\ge\ell+2]=:s_3^{\min}(\ell,M).
+\end{gather*}
+\end{lemma}
+\begin{proof}
+An $r$-multiset below both $P$ and $P'$ would give $\ov(P,P')\ge r$; so the sets of $r$-sub-multisets are pairwise disjoint subsets of the
+$\binom{d+r-1}r$ $r$-multisets on $[d]$. The formulas count sub-multisets by shape ($\{x,y\}$, $\{x,x\}$; $\{x,y,z\}$, $\{x,x,y\}$,
+$\{x,x,x\}$). $M>\ell$ forces $\ell_2\ge1$. If $M\ge\ell+2$, either some coordinate is $\ge3$ ($\ell_3\ge1$, $\ell_2\ge1$) or two coordinates
+are $\ge2$ ($\ell_2\ge2$ and $2(\ell-1)\ge(\ell-1)+1$ since $\ell\ge2$).
+\end{proof}
+Lemma~\ref{lem:J} is the multiset analogue of the Johnson packing bound; it is not an Erd\H{o}s--Ko--Rado statement~\cite{MeagherPurdy2011}.
+
+\subsection{Part (a): \texorpdfstring{$d=2$}{d=2}, all \texorpdfstring{$T,k$}{T,k}}\label{app:d2}
+Throughout this subsection $d=2$ and $N=T+k$. Write $b=(b,T-b)$ with $b\in\{0,\dots,T\}$, $\Delta=(\delta,k-\delta)$ with $\delta\in\Z$, and
+$c_m=\binom Nm$ for $0\le m\le N$, $c_m=0$ otherwise. The output $b+\Delta=(b+\delta,N-b-\delta)$ is nonnegative iff $0\le b+\delta\le N$, so
+\begin{gather*}
+\mathcal D_\Delta=\{b\in\Z:\ \max(0,-\delta)\le b\le\min(T,N-\delta)\}\quad\text{(an interval, possibly empty)},\\
+\Lambda(\Delta)=\sum_{b=0}^Ta_b\,c_{b+\delta}.
+\end{gather*}
+The boundary cases $b=0$, $b=T$ and partial or empty supports are all covered by the convention $c_m=0$ for $m\notin[0,N]$.
+
+\begin{lemma}[Dominated rearrangement]\label{lem:rearr}
+Let $x_0\ge x_1\ge\dots\ge x_n\ge0$ and let $(y_m)_{m\in Y}$ be nonnegative numbers on a finite index set $Y$ with $|Y|\ge n+1$; let
+$y_{(0)}\ge\dots\ge y_{(n)}$ be the $n+1$ largest of them (with multiplicity). If $U\subset\{0,\dots,n\}$ and $\sigma:U\to Y$ is injective, then
+$\sum_{u\in U}x_u\,y_{\sigma(u)}\le\sum_{i=0}^nx_i\,y_{(i)}$.
+\end{lemma}
+\begin{proof}
+Let $\gamma_0\ge\gamma_1\ge\dots$ be the values $y_{\sigma(u)}$, $u\in U$, sorted decreasingly. They sit at $|U|$ distinct positions of $Y$
+(injectivity), so for each $i$ the $i+1$ values $\gamma_0,\dots,\gamma_i$ occupy $i+1$ distinct positions; at most $i$ positions of $Y$
+carry a value $>y_{(i)}$, hence $\gamma_i\le y_{(i)}$. Likewise the sorted values $\xi_0\ge\xi_1\ge\dots$ of $(x_u)_{u\in U}$ satisfy
+$\xi_i\le x_i$. By the rearrangement inequality and nonnegativity,
+$\sum_{u\in U}x_uy_{\sigma(u)}\le\sum_i\xi_i\gamma_i\le\sum_{i<|U|}x_iy_{(i)}\le\sum_{i=0}^nx_iy_{(i)}$.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:packing}(a)]
+Let $F$ be any finite set of shifts that pairwise satisfy (ii) (no condition on $n(\Delta)$ is needed when $d=2$; members with empty
+support contribute $0$).
+
+\emph{Step 1: separation gives a partial injection.} For $d=2$, $\lVert\Delta-\Delta'\rVert_1=|\delta-\delta'|+|(k-\delta)-(k-\delta')|=2|\delta-\delta'|$,
+so (ii) reads $|\delta-\delta'|\ge N+1$. (i) Supports are disjoint: if $b\in\mathcal D_\Delta\cap\mathcal D_{\Delta'}$, then
+$b+\delta,b+\delta'\in[0,N]$, so $|\delta-\delta'|\le N$. (ii) Outputs are distinct: if $b+\delta=b'+\delta'$ with $b,b'\in[0,T]$, then
+$|\delta-\delta'|=|b-b'|\le T<N+1$. Let $U=\bigcup_{\Delta\in F}\mathcal D_\Delta\subset\{0,\dots,T\}$; by (i) each $b\in U$ lies in the support of
+exactly one member $\Delta(b)=(\delta(b),k-\delta(b))$, and $\sigma(b):=b+\delta(b)\in[0,N]$ is injective on $U$ by (ii). Hence
+\[
+\sum_{\Delta\in F}\Lambda(\Delta)=\sum_{b\in U}a_b\,c_{\sigma(b)} .
+\]
+
+\emph{Step 2: the $T+1$ largest $c$-values, before any rearrangement.} Let $c_{(0)}\ge\dots\ge c_{(T)}$ be the $T+1$ largest entries of
+$(c_m)_{m=0}^N$ ($N+1\ge T+1$ entries). Put $\delta_0=\lceil k/2\rceil$ and $g=(\delta_0,k-\delta_0)$; $g\in C$ in both parities ($g=(k/2,k/2)$ for $k$ even,
+$g=(\frac{k+1}2,\frac{k-1}2)$ for $k$ odd), and $\mathcal D_g=\{0,\dots,T\}$ because $g\ge0$. The window $\{\delta_0,\dots,\delta_0+T\}$ of row $N$
+is $\{\lceil k/2\rceil,\dots,N-\lfloor k/2\rfloor\}$. Every window position $i$ has $i\ge\lceil k/2\rceil\ge\lfloor k/2\rfloor$ and $N-i\ge\lfloor k/2\rfloor$,
+so $\min(i,N-i)\ge\lfloor k/2\rfloor$. Every omitted position $j$ has either $j\le\lceil k/2\rceil-1\le\lfloor k/2\rfloor$ or $N-j\le\lfloor k/2\rfloor-1$, so
+$\min(j,N-j)\le\lfloor k/2\rfloor$. Since $\binom Nm$ is a nondecreasing function of $\min(m,N-m)$, every window value is $\ge$ every omitted value;
+hence the multiset $\{c_{b+\delta_0}\}_{b=0}^T$ is exactly $\{c_{(0)},\dots,c_{(T)}\}$.
+
+\emph{Step 3: upper bound.} By Lemma~\ref{lem:rearr} with $x=(a_b)$ sorted decreasingly, $Y=\{0,\dots,N\}$, $y=c$ and the injection $\sigma$ of Step 1,
+$\sum_F\Lambda\le\Lambda^\ast:=\sum_{i=0}^Ta_{(i)}c_{(i)}$, where $a_{(0)}\ge\dots\ge a_{(T)}$ is the decreasing rearrangement of $(a_b)_{b=0}^T$.
+
+\emph{Step 4: unimodality of $a_b$ (all $b$, including $b=0,T$).} For even $L\ge2$ and $0\le b\le T$ put $r_L(b)=\binom Tb/\binom{T+L}{b+L/2}$
+(the lower index $b+L/2\in[L/2,T+L/2]$ is always admissible). Then $r_L(T-b)=r_L(b)$ and, for $0\le b\le T-1$,
+\[
+\frac{r_L(b+1)}{r_L(b)}=\frac{(T-b)(b+L/2+1)}{(b+1)(T+L/2-b)},\qquad (T-b)(b+\tfrac L2+1)-(b+1)(T+\tfrac L2-b)=\tfrac L2(T-1-2b),
+\]
+so $r_L$ is nondecreasing on $0\le b\le(T-1)/2$; with the symmetry, $r_L(b)$ is a nonincreasing function of $|b-T/2|$. If $k$ is even,
+$C=\{(k/2,k/2)\}$, $Z_b=\binom N{b+k/2}$ and $a_b^2=r_k(b)$. If $k$ is odd, $C=\{(\frac{k+1}2,\frac{k-1}2),(\frac{k-1}2,\frac{k+1}2)\}$ and Pascal's rule
+gives $Z_b=\binom N{b+(k+1)/2}+\binom N{b+(k-1)/2}=\binom{N+1}{b+(k+1)/2}$, so $a_b^2=r_{k+1}(b)$ (with $T+k+1=N+1$). In both cases $a_b$ is a
+nonincreasing function of $|b-T/2|$.
+
+\emph{Step 5: $\Lambda_0=\Lambda^\ast$.} $\Lambda_0=\Lambda(g)=\sum_{b=0}^Ta_bc_{b+\delta_0}$. By Step 2 the second factors are $c_{(0)},\dots,c_{(T)}$ in some
+order, so it suffices that the pairing $b\mapsto(a_b,c_{b+\delta_0})$ is similarly ordered, i.e.\ that $a_b>a_{b'}$ implies $c_{b+\delta_0}\ge c_{b'+\delta_0}$
+(then sorting by $a$ with ties broken by $c$ sorts both sequences, and $\Lambda_0=\Lambda^\ast$). Note $c_{b+\delta_0}$ is a nonincreasing function of
+$|b+\delta_0-N/2|$, which is $|b-T/2|$ for $k$ even and $|b-\frac{T-1}2|$ for $k$ odd. If $a_b>a_{b'}$, then $|b-\frac T2|<|b'-\frac T2|$ (Step 4).
+For $k$ even this is the claim. For $k$ odd, both numbers lie in $\frac T2+\Z$, so $|b-\frac T2|\le|b'-\frac T2|-1$, hence
+$|b-\frac{T-1}2|\le|b-\frac T2|+\frac12\le|b'-\frac T2|-\frac12\le|b'-\frac{T-1}2|$, and $c_{b+\delta_0}\ge c_{b'+\delta_0}$.
+
+Combining Steps 1--5, $\sum_F\Lambda\le\Lambda^\ast=\Lambda_0$, i.e.\ $\rho(F)\le1$, with equality for $F=\{g\}$.
+\end{proof}
+
+\subsection{Part (b): \texorpdfstring{$T=1$}{T=1}, all \texorpdfstring{$d\ge2$}{d>=2}, \texorpdfstring{$k\ge1$}{k>=1}}\label{app:T1}
+Here $N=k+1$ and $|b|=1$, so $b=e_a$. We prove the slightly stronger bound $\rho(F)\le\frac{q+2}{2(d-1)(q+1)}$ for $k\ge d$, $q=\lfloor k/d\rfloor$,
+which implies the stated $3/(4(d-1))$ because $q\ge1$.
+\begin{proof}[Proof of Theorem~\ref{thm:packing}(b)]
+Let $F$ be a family (Remark~\ref{rem:famscope}) with $|F|\ge2$.
+
+\emph{Step 1: shape of the members.} Every member has $n(\Delta)\in\{0,1\}$. A member with $n=0$ and any partner with $n'\le1$ would need, by
+Lemma~\ref{lem:S}, $\ov(\Delta^+,\Delta'^+)+\ov(\Delta^-,\Delta'^-)\le n+n'-T-1\le-1$, impossible. So every member has $n=1$:
+$\Delta^-=e_a$ for one index $a$, and $\Delta^+=:m_a$ satisfies $|m_a|=k+1=N$ and $(m_a)_a=0$ ($\Delta^\pm$ have disjoint supports). We write
+$\Delta_a=m_a-e_a$.
+
+\emph{Step 2: value of a member.} $b\ge\Delta_a^-=e_a$ and $|b|=1$ force $b=e_a$, so $\mathcal D_{\Delta_a}=\{e_a\}$ with output $m_a$, and
+$\Lambda(\Delta_a)=a_{e_a}\mult(m_a)$. Since $C$ is $S_d$-invariant, $Z_{e_a}$ and hence $a_1:=a_{e_a}$ do not depend on $a$.
+
+\emph{Step 3: support disjointness.} For two members $\Delta_a,\Delta_{a'}$, Lemma~\ref{lem:S} gives
+\[
+\lVert\Delta_a-\Delta_{a'}\rVert_1=2(k+2)-2\,\ov(m_a,m_{a'})-2\,\ov(e_a,e_{a'}),
+\]
+so (ii), i.e.\ $\lVert\Delta_a-\Delta_{a'}\rVert_1\ge2(k+2)$, holds iff $\ov(m_a,m_{a'})=0$ and $\ov(e_a,e_{a'})=0$. Thus the indices $a$ of distinct members are
+distinct, and the supports $S_a=\mathrm{supp}\,m_a$ are pairwise disjoint subsets of $[d]$. Put $s_a=|S_a|$. Then $1\le s_a\le s^\ast:=\min(N,d-1)$
+($m_a\ne0$; $m_a$ has at most $N$ positive entries; $S_a\subset[d]\setminus\{a\}$), and $\sum_as_a\le d$.
+
+\emph{Step 4: monotonicity of $f(s)=\Mb(N,s)/s$.} For integers $1\le s$ with $s+1\le\min(N,d)$, Lemma~\ref{lem:M}(M1) (applicable since $N>s$ and $s<d$) gives
+\[
+\frac{f(s+1)}{f(s)}=\frac{s}{s+1}\cdot\frac{\Mb(N,s+1)}{\Mb(N,s)}\ \ge\ \frac{2s}{s+1}\ \ge\ 1 .
+\]
+So $f$ is nondecreasing on $\{1,\dots,\min(N,d)\}$, and $s^\ast\le\min(N,d)$.
+
+\emph{Step 5: numerator.} $\mult(m_a)\le\Mb(N,s_a)=s_af(s_a)\le s_af(s^\ast)$, so
+\[\textstyle\sum_a\Lambda(\Delta_a)\le a_1f(s^\ast)\sum_as_a\le a_1\,d\,f(s^\ast).\]
+
+\emph{Step 6: denominator.} Write $k=qd+s$ with $0\le s\le d-1$; $g\in C$ has $s$ coordinates $q+1$ and $d-s\ge1$ coordinates $q$, and $\mathcal D_g=\{e_j\}_{j\in[d]}$.
+If $g_j=q$, then $g+e_j$ is balanced of size $N$, so $\mult(g+e_j)=\Mb(N,d)$. If $g_j=q+1$, moving one unit from coordinate $j$ (value $q+2$) to a
+coordinate of value $q$ yields a balanced vector and multiplies $\mult$ by $(q+2)/(q+1)$ (move rule), so $\mult(g+e_j)=\Mb(N,d)\frac{q+1}{q+2}$. Hence
+\[
+\Lambda_0=a_1\sum_j\mult(g+e_j)=a_1\Mb(N,d)\Big[(d-s)+s\,\frac{q+1}{q+2}\Big],\qquad
+\rho(F)\le\frac{d\,f(s^\ast)}{\Mb(N,d)\big[(d-s)+s\frac{q+1}{q+2}\big]} .
+\]
+
+\emph{Case A: $1\le k\le d-1$.} Then $q=0$, $s=k$, $N=k+1\le d$, so $\Mb(N,d)=N!$ and the bracket is $d-k/2$. Here $s^\ast=N$ if $k\le d-2$ and
+$s^\ast=N-1$ if $k=d-1$; in both subcases $s^\ast\le N=\min(N,d)$, so $f(s^\ast)\le f(N)=N!/N=(N-1)!$ by Step 4. Hence
+\[
+\rho(F)\le\frac{d\,(N-1)!}{N!\,(d-k/2)}=\frac{d}{(k+1)(d-k/2)},
+\]
+and $(k+1)(d-\frac k2)-d=k\big(d-\frac{k+1}2\big)>0$ (as $k+1\le d$), so the bound is $<1$.
+
+\emph{Case B: $k\ge d$.} Then $q\ge1$ and $N=k+1\ge d+1$, so $s^\ast=d-1$ and $f(s^\ast)=\Mb(N,d-1)/(d-1)$. The bracket is
+$\ge d\frac{q+1}{q+2}$, and (M1) with $M=N>d-1=\ell$, $\ell<d$ gives $\Mb(N,d)\ge2\Mb(N,d-1)$. Hence
+\[
+\rho(F)\le\frac{d\,\Mb(N,d-1)/(d-1)}{2\Mb(N,d-1)\,d\,\frac{q+1}{q+2}}=\frac{q+2}{2(d-1)(q+1)}\le\frac{3}{4(d-1)}<1 .
+\]
+Cases A and B exhaust $k\ge1$ for every $d\ge2$ (for $d=2$: Case A is $k=1$, Case B is $k\ge2$).
+\end{proof}
+For $k=1$ the Case A bound is $d/(2d-1)$; at $d=3$ it equals $0.6$, the exact maximum found by the clique LP (research-phase computation
+[Num]), so the bound is sharp there.
+
+\subsection{Part (c): \texorpdfstring{$T=2$}{T=2}, all \texorpdfstring{$d\ge3$}{d>=3}, \texorpdfstring{$k\ge1$}{k>=1}}\label{app:T2}
+Here $N=k+2$. The types of $|b|=2$ are A ($b=2e_i$, $c_b=1$, $d$ of them) and B ($b=e_i+e_j$, $c_b=2$, $\binom d2$ of them); by symmetry
+$\kappa_b$ and $\theta_b$ depend only on the type, and in units of $M^\ast$, $W=d\sqrt{\kappa_A}+\binom d2\sqrt{2\kappa_B}$, $\theta_A=1/\sqrt{\kappa_A}$,
+$\theta_B=\sqrt{2/\kappa_B}$.
+
+\paragraph{T2.1 Structure.} By Lemma~\ref{lem:S}, $n\in\{1,2\}$ (S3), at most one member has $n=1$ (S2), and members with $n=2$ are pinned (S4).
+The \emph{light} member (if any) is $\Delta_1=Q-e_i$ with $|Q|=k+1$, $Q_i=0$; its support is $\{2e_i\}\cup\{e_i+e_j\}_{j\ne i}$ with outputs
+$Q+e_i$ and $Q+e_j$. A \emph{pinned} member is $\Delta=P-b$ with $|b|=2$, $|P|=N$, $\mathrm{supp}P\cap\mathrm{supp}b=\emptyset$, and value
+$\theta_b\mult(P)$. The budgets of Lemma~\ref{lem:S} give: pinned--pinned ($n+n'-3=1$): $\ov(P,P')+\ov(b,b')\le1$, so the $b$'s are distinct
+($\ov(b,b)=2$) and $\ov(P,P')\le1$; light--pinned ($n+n'-3=0$): $\ov(P,Q)=0$ and $b_i=0$.
+
+\paragraph{T2.2 Light value.} With $t=|\mathrm{supp}Q|$ and the move rule $\mult(Q+e_x)=N\mult(Q)/(Q_x+1)$,
+\begin{align*}
+V_1(Q)&=\theta_A\mult(Q+e_i)+\theta_B\sum_{j\ne i}\mult(Q+e_j)\\&=N\mult(Q)\Big[\theta_A+\theta_B\Big((d-1-t)+\sum_{x\in\mathrm{supp}Q}\frac1{Q_x+1}\Big)\Big]\\
+&\le\theta_AN\Mb(N-1,d-1)+(d-1)\theta_B\Mb(N,d-1).
+\end{align*}
+
+\paragraph{T2.3 Master bound.} Drop the light--pinned constraints. At most $d$ pinned members have type A, each of value $\le\theta_A\Mb(N,d-1)$.
+For type B, $\ell=|\mathrm{supp}P|\le\min(d-2,N)$, so by Lemma~\ref{lem:J} ($r=2$),
+$\mult(P)\le\Mb(N,\ell)\le\varphi_B\,s_2(P)$ with $\varphi_B=\max_{1\le\ell\le\min(d-2,N)}\Mb(N,\ell)/(\binom\ell2+[N>\ell])$, and
+$\sum s_2(P)\le\binom{d+1}2$. Hence
+\[
+\rho(F)\le S(d,k):=\frac1W\Big[\theta_AN\Mb(N-1,d-1)+(d-1)\theta_B\Mb(N,d-1)+\theta_B\varphi_B\tbinom{d+1}2+d\,\theta_A\Mb(N,d-1)\Big].
+\]
+With $W\ge\binom d2\sqrt{2\kappa_B}$, $r_0=\Mb(N,d-1)/M^\ast$, $r_1=N\Mb(N-1,d-1)/M^\ast$, $r_\varphi=\varphi_B/M^\ast$:
+\begin{equation}\label{eq:T2star}
+S\le\frac2d\frac{r_0}{\kappa_B}+\frac{d+1}{d-1}\frac{r_\varphi}{\kappa_B}+\frac2{d-1}\frac{r_0}{\sqrt{2\kappa_A\kappa_B}}+\frac2{d(d-1)}\frac{r_1}{\sqrt{2\kappa_A\kappa_B}}.
+\end{equation}
+
+\paragraph{T2.4 Ratio lemmas.} Let $q_0=\lfloor k/d\rfloor$.
+\begin{itemize}
+\item[(K)] $\kappa_B\ge(\frac{q_0+1}{q_0+2})^2\ge\frac14$ and $\kappa_A\ge\frac{(q_0+1)^2}{(q_0+2)(q_0+3)}\ge\frac16$. \emph{Proof.} Fix $g\in C$ and let $y$ be
+$g$ plus two units placed on smallest coordinates; $y$ is balanced of size $N$, so $\mult(y)=M^\ast$ and $\prod y_i!/\prod g_i!\ge(q_0+1)^2$.
+Also $\prod(b+g)_i!/\prod g_i!\le(q_0+2)^2$ (type B) and $\le(q_0+2)(q_0+3)$ (type A). Since $\mult(b+g)/M^\ast=\frac{\prod y_i!/\prod g_i!}{\prod(b+g)_i!/\prod g_i!}$,
+the bounds hold termwise in the average.
+\item[(K0)] If $k\le d-2$: $M^\ast=N!$, $g$ is a $0/1$ vector with $k$ ones, $\kappa_B=\E\,2^{-X}\ge1-\E X/2=1-k/d$ with $X=g_i+g_j$ (as
+$2^{-x}\ge1-x/2$ on $\{0,1,2\}$), $\kappa_A=\E[1/(2+g_i)!]=\frac12-\frac k{3d}$, and $r_\varphi\le1/\binom N2$. \emph{Proof of the last
+bound.} If $N\le d-2$, $\ell=N$ gives $\Mb(N,N)/\binom N2=N!/\binom N2$. For $\ell\le N-1$, (M1) gives $\Mb(N,\ell)/(\binom\ell2+1)\le N!/g(\ell)$
+with $g(\ell)=2^{N-\ell}(\binom\ell2+1)$; $g(\ell)/g(\ell+1)=2(\ell^2-\ell+2)/(\ell^2+\ell+2)\ge1\iff(\ell-1)(\ell-2)\ge0$, so $g$ is
+nonincreasing, and $g(N-1)-\binom N2=\frac12(N^2-5N+8)>0$.
+\item[(Moves)] By (M2) with $m=\lfloor N/d\rfloor$: $r_0\le R_m$ (one empty coordinate), $r_1\le mR_m$ ($r_1$ is $\mult(x)/M^\ast$ for an $x$ with a
+coordinate equal to $1$), $r_\varphi\le R_m^2$. By (M1) when $N\ge d+1$: $r_0\le\frac12$ and
+$r_\varphi\le\max_{\ell\le d-2}2^{\ell-d}/(\binom\ell2+1)=1/(4(\binom{d-2}2+1))$ (the maximand is $1/g$ with $N$ replaced by $d$).
+\end{itemize}
+
+\paragraph{T2.5 Lagrangian bound for the sharp cases.} Fix the shape of the light member $Q-e_i$, with $t=|\mathrm{supp}Q|$ and $o=d-1-t$.
+Admissible pinned members have $b_i=0$ and $P\subset[d]\setminus\mathrm{supp}Q$, a ground set of size $d-t$, so Lemma~\ref{lem:J} gives
+$\sum s_2(P)\le\binom{d-t+1}2=:\mathrm{cap}$. The possible $b$ fall into five classes:
+\begin{center}\small
+\begin{tabular}{lcc}\toprule
+class of $b$ & count & coordinates available to $P$\\\midrule
+$2e_j$, $j\in\mathrm{supp}Q$ & $t$ & $d-t$\\
+$2e_j$, $j\notin\mathrm{supp}Q\cup\{i\}$ & $o$ & $d-t-1$\\
+$e_j+e_l$, both in $\mathrm{supp}Q$ & $\binom t2$ & $d-t$\\
+$e_j+e_l$, one in $\mathrm{supp}Q$ & $to$ & $d-t-1$\\
+$e_j+e_l$, neither in $\mathrm{supp}Q$ & $\binom o2$ & $d-t-2$\\\bottomrule
+\end{tabular}
+\end{center}
+Each $b$ carries at most one pinned member. For every $\lambda\ge0$ (weak duality),
+\[
+\sum_{\rm pinned}\theta_b\mult(P_b)\le\lambda\,\mathrm{cap}+\sum_b\max\Big(0,\ \max_P\big(\theta_b\mult(P)-\lambda s_2(P)\big)\Big),
+\]
+where the inner maximum runs over partitions $P$ of $N$ with at most the available number of parts ($s_2$ depends only on the shape). Thus
+$\rho(F)\le\max(\rho_A,\rho_B)$, where $\rho_A$ is this Lagrangian divided by $W$ with no light member (all $d$ A-classes with $d-1$ available
+coordinates and all $\binom d2$ B-classes with $d-2$, $\mathrm{cap}=\binom{d+1}2$), and $\rho_B=\max_Q[V_1(Q)+\text{Lagrangian}(Q)]/W$ over
+partitions $Q$ of $k+1$ into at most $d-1$ parts.
+
+\paragraph{T2.6 Region reduction.} Define (all from \eqref{eq:T2star})
+\begin{align*}
+E_1(d)&=\frac8d+\frac{d+1}{d-1}\,t_3(d)+\frac{2}{d-1}\Big(1+\frac1d\Big)\sqrt{12},\\ t_3(d)&=\max\Big\{\frac{1/3}{1-1/d},\frac{1/6}{1-2/d},\frac2{10},\frac{8}{(\lfloor d/2\rfloor+1)(\lfloor d/2\rfloor+2)}\Big\},\\
+E_2^u(d)&=\frac8d+\frac{d+1}{d-1}\cdot\frac1{\binom{d-2}2+1}+\frac2{d-1}\Big(1+\frac1d\Big)\sqrt{12},\\
+E_2(d,m)&=\frac{2}{d}\frac{\min(1,R_m)}{\kappa_B^{(m)}}+\frac{d+1}{d-1}\frac{\min\big(\frac1{4(\binom{d-2}2+1)},R_m^2\big)}{\kappa_B^{(m)}}\\
+&\quad+\frac{\frac2{d-1}\min(1,R_m)+\frac2{d(d-1)}\min(1,mR_m)}{\sqrt{2\kappa_A^{(m)}\kappa_B^{(m)}}},
+\end{align*}
+with $\kappa_B^{(m)}=(\frac m{m+1})^2$ and $\kappa_A^{(m)}=\frac{m^2}{(m+1)(m+2)}$.
+\begin{itemize}
+\item \textbf{Region I} ($k\le d-2$, $d\ge40$). In \eqref{eq:T2star} use $r_0,r_1\le1$ ($M^\ast=N!$), $\kappa_B\ge\frac14$, $\kappa_A\ge\frac16$ and, for the
+second term, $r_\varphi/\kappa_B\le1/(\binom N2\max(1-\frac kd,\frac14))\le t_3(d)$ (cases $k=1$, $k=2$, $3\le k\le d/2$, $k>d/2$). So $S\le E_1(d)$, and
+every summand of $E_1$ is nonincreasing in $d$. $E_1(40)\le0.741501$ \checker{t2_interval/check_t2.py, step C1}.
+\item \textbf{Region II} ($k\ge d-1$, $d\ge20$; so $N\ge d+1$). (K) with $q_0\ge0$, (Moves) $r_\varphi\le1/(4(\binom{d-2}2+1))$, and $r_0,r_1\le1$ give
+$S\le E_2^u(d)$, nonincreasing in $d$. $E_2^u(20)\le0.790052$ \checker{t2_interval/check_t2.py, step C2}.
+\item \textbf{Region II$'$} ($3\le d\le19$, $k\ge(m_0(d)+1)d-2$, so $m=\lfloor N/d\rfloor\ge m_0(d)+1$ and $N\ge d+1$). Since
+$m=\lfloor(k+2)/d\rfloor\le q_0+1$, (K) with $q_0\ge m-1$ and (Moves) give $S\le E_2(d,m)$. $E_2$ is nonincreasing in $m$: the $\kappa^{(m)}$
+increase, and $R_m$, $mR_m=m!/m^{m-1}$, $R_m^2$ decrease. With $m_0=4,3,3$ for $d=3,4,5$, $m_0=2$ for $6\le d\le16$ and $m_0=1$ for
+$17\le d\le19$ (minimal with $E_2(d,m_0)<1$), $\max_dE_2(d,m_0)\le0.977398$ \checker{t2_interval/check_t2.py, step C3}.
+\item \textbf{Finite remainder} ($d\le39$, $k\le d-2$; and $d\le19$, $d-1\le k\le(m_0+1)d-3$): 1021 pairs. $S(d,k)$ is evaluated in interval
+arithmetic with $\mathrm{avg}_A,\mathrm{avg}_B$ exact rationals (closed form, checked against enumeration of $C$ for $d\le7$). $S<1$ except at 13 pairs;
+the largest value below 1 is $\le0.996011$ at $(9,6)$ \checker{t2_interval/check_t2.py, step C4}.
+\item \textbf{The 13 sharp pairs} $(d,k)\in\{(3,1)$, $(4,1)$, $(4,2)$, $(5,1)$, $(5,2)$, $(6,1)$, $(6,2)$, $(6,3)$, $(7,1)$, $(7,2)$, $(7,3)$, $(7,4)$, $(8,5)\}$: T2.5 evaluated in
+interval arithmetic with stored multipliers $\lambda$ (any $\lambda\ge0$ is valid) gives $\rho\le0.679481$, attained at $(3,1)$
+\checker{t2_interval/check_t2.py, step C5}.
+\end{itemize}
+By Lemma~\ref{lem:cover}(1) the regions cover all $d\ge3$, $k\ge1$, and the supremum of the bounds is $\le0.996011\le0.9961$. \qed
+
+\subsection{Part (d): \texorpdfstring{$T=3$}{T=3}, all \texorpdfstring{$d\ge3$}{d>=3}, \texorpdfstring{$k\ge1$}{k>=1}}\label{app:T3}
+Here $N=k+3$. The types of $|b|=3$ are A ($3e_i$, $c=1$, $d$ of them), B ($2e_i+e_j$, $c=3$, $d(d-1)$) and C ($e_i+e_j+e_l$, $c=6$,
+$\binom d3$); in units of $M^\ast$, $\theta_X=\sqrt{c_X/\kappa_X}$ and $W=d\sqrt{\kappa_A}+d(d-1)\sqrt{3\kappa_B}+\binom d3\sqrt{6\kappa_C}$.
+
+\paragraph{T3.1 Structure.} By Lemma~\ref{lem:S} (budget $n+n'-4$) the members are of three kinds: \textbf{L} ($n=1$): $Q-e_i$, $|Q|=k+1$, $Q_i=0$;
+\textbf{M} ($n=2$): $P-c$, $|c|=2$, $|P|=k+2$, $\mathrm{supp}P\cap\mathrm{supp}c=\emptyset$; \textbf{Pin} ($n=3$): $R-b$, $|R|=N$,
+$\mathrm{supp}R\cap\mathrm{supp}b=\emptyset$. L--L ($n+n'=2$) and L--M ($n+n'=3$) violate (S1), so a family has at most one L and never both an L and
+an M. M--M has budget $0$: the $P$'s are pairwise disjoint. Pin--Pin has budget $2$: $\ov(R,R')\le2$ and the $b$'s are distinct ($\ov(b,b)=3$).
+L--Pin and M--Pin constraints are dropped. Hence $\rho(F)\le(\max(V_L,V_M)+V_P)/W$, where $V_L$ bounds one L, $V_M$ all M's and $V_P$ all
+pins.
+
+\paragraph{T3.2 The three bounds} (units of $M^\ast$; $r_{A2}=\binom N2\Mb(N-2,d-1)/M^\ast$, $r_1=N\Mb(N-1,d-1)/M^\ast$, $r_0=\Mb(N,d-1)/M^\ast$).
+\begin{itemize}
+\item $V_L$: the support of $Q-e_i$ is $\{e_i+c':|c'|=2\}$ with outputs $Q+c'$: $b=3e_i$ gives $\mult(Q+2e_i)=\binom N2\mult(Q)$; $b=2e_i+e_j$ gives
+$\mult(Q+e_i+e_j)=N\mult(Q+e_j)$; $b=e_i+2e_j$ and $b=e_i+e_j+e_l$ give vectors of size $N$ on $d-1$ coordinates. So
+$V_L=\theta_Ar_{A2}+(d-1)\theta_B(r_1+r_0)+\binom{d-1}2\theta_Cr_0$.
+\item $V_M$: the support of $P-c$ is $\{c+e_j\}_{j\in[d]}$, so its value is
+\begin{align*}&\le\theta_{\max}\sum_j\mult(P+e_j)=\theta_{\max}N\mult(P)\Big[(d-\ell)+\sum_{x\in\mathrm{supp}P}\frac1{P_x+1}\Big]\\
+&\le\theta_{\max}N\Mb(N-1,\ell)(d-\ell/2)\end{align*}
+with $\ell=|\mathrm{supp}P|\le d-1$. The supports are disjoint, so $\sum\ell\le d$ and
+$V_M=\theta_{\max}\,d\,N_f$ with $N_f=\max_{1\le\ell\le d-1}N\Mb(N-1,\ell)(2d-\ell)/(2\ell M^\ast)$.
+\item $V_P$: at most $d$ A-pins, each $\le\theta_Ar_0$. For B- and C-pins, Lemma~\ref{lem:J} ($r=3$) gives $\sum s_3(R)\le\binom{d+2}3$ and
+$\mult(R)\le\varphi_Xs_3(R)$ with $\varphi_X=\max_{\ell\le\min(d-a_X,N)}\Mb(N,\ell)/s_3^{\min}(\ell,N)$, $a_B=2$, $a_C=3$. So
+$V_P=d\theta_Ar_0+\max(\theta_B\varphi_B,\theta_C\varphi_C)\binom{d+2}3/M^\ast$.
+\end{itemize}
+Define $S_3(d,k)=(\max(V_L,V_M)+V_P)/W$; then $\rho(F)\le S_3(d,k)$.
+
+\paragraph{T3.3 Ratio lemmas.} Let $q_0=\lfloor k/d\rfloor$, $t=k/d$.
+\begin{itemize}
+\item[(K3)] $\kappa_A\ge\frac{(q_0+1)^3}{(q_0+2)(q_0+3)(q_0+4)}\ge\frac1{24}$, $\kappa_B\ge\frac{(q_0+1)^3}{(q_0+2)^2(q_0+3)}\ge\frac1{12}$,
+$\kappa_C\ge(\frac{q_0+1}{q_0+2})^3\ge\frac18$: as (K), adding three units.
+\item[(K3-0)] If $k\le d-3$ ($g$ is $0/1$, $M^\ast=N!$): $\kappa_C=\E2^{-X}\ge1-\frac32t$; $\kappa_B=\frac12\E[3^{-g_1}2^{-g_2}]\ge\frac12(1-\frac76t)$;
+$\kappa_A=\E[1/(3+g_1)!]=\frac16(1-\frac34t)$.
+\item[(J3)] If $N\ge4$, then $\Mb(N,\ell)/s_3^{\min}(\ell,N)\le N!/\binom N3$ for all $\ell\le N$. \emph{Proof.} Equality at $\ell=N$. At $\ell=N-1$:
+$\Mb=N!/2$, $s_3^{\min}=\binom{N-1}3+N-2$, and $\binom N3\le2\binom{N-1}3+2(N-2)\iff\binom{N-1}2\le\binom{N-1}3+2(N-2)$, true for $N\ge6$
+($\binom{N-1}3\ge\binom{N-1}2$) and for $N=4,5$ ($3\le5$, $6\le10$). For $\ell\le N-2$: $\Mb\le N!2^{\ell-N}$, $s_3^{\min}\ge\binom\ell3+\ell$, and
+$h(\ell)=2^{N-\ell}(\binom\ell3+\ell)$ is nonincreasing ($h(\ell)/h(\ell+1)\ge1\iff\binom\ell3+\ell-1\ge\binom\ell2$, true for $\ell\ge1$);
+finally $h(N-2)-\binom N3=4(\binom n3+n)-\binom{n+2}3=\frac n2(n^2-5n+10)\ge0$ with $n=N-2$.
+\item[(J3$'$)] If $N\ge d+1$: $\varphi_X/M^\ast\le\max_{\ell\le d-2}2^{\ell-d}/(\binom\ell3+\ell)=1/(4(\binom{d-2}3+d-2))$ by (M1) and the same monotonicity.
+\end{itemize}
+
+\paragraph{T3.4 Region reduction.} Every step is either proved here or an evaluation by \nolinkurl{t3_master/t3_bounds.py}.
+\begin{itemize}
+\item \textbf{U1} ($d\ge100$, $1\le k\le d-3$, so $N\le d$, $M^\ast=N!$). Use $W\ge\binom d3\sqrt{6\kappa_C}$; $r_{A2},r_1,r_0\le1$; $N_f\le d/(N-1)$
+(for $\ell\le N-1$, $N\Mb(N-1,\ell)/N!\le2^{\ell+1-N}$ and $\ell2^{N-1-\ell}\ge N-1$; for $\ell\ge N$ the ratio is $\le(2d-\ell)/(2\ell)\le d/N$);
+$\varphi_X/M^\ast\le1/\binom N3$ (J3); and the larger of the (K3) and (K3-0) lower bounds for the $\kappa$'s, with $\theta_{\max}=\max(1/\sqrt{\kappa_A},\sqrt{3/\kappa_B},\sqrt{6/\kappa_C})$. This gives
+\begin{align*}
+S_3\le B_1(d,k)={}&\max\Big\{\frac{1}{\binom d3\sqrt{6\kappa_A\kappa_C}}+\frac{2(d-1)}{\binom d3\sqrt{2\kappa_B\kappa_C}}+\frac3d\frac1{\kappa_C},\ \frac{\theta_{\max}d^2}{(N-1)\binom d3\sqrt{6\kappa_C}}\Big\}\\
+&+\frac{d}{\binom d3\sqrt{6\kappa_A\kappa_C}}+\max\Big\{\frac1{\sqrt{2\kappa_B\kappa_C}},\frac1{\kappa_C}\Big\}\frac{\binom{d+2}3}{\binom d3\binom N3}.
+\end{align*}
+For fixed $k$, $B_1$ is decreasing in $d$. For $k<12$ its value at $d=\max(100,k+3)=100$ is at most $0.301833$; for $k\ge12$, with the crude (K3)
+constants, $B_1$ is also decreasing in $N$, so $B_1\le B_1^{\rm crude}(100,N=15)\le0.270687$ \checker{t3_master/t3_bounds.py}.
+\item \textbf{U2} ($d\ge100$, $N\ge d+1$). (K3) crude constants, $r_1,r_{A2}\le1$, $r_0\le\frac12$ (M1), $N_f\le d/(d-1)$ (since
+$N\Mb(N-1,\ell)\le\Mb(N,\ell+1)\le M^\ast2^{\ell+1-d}$ and $\ell2^{d-1-\ell}\ge d-1$) and (J3$'$) give a bound $B_2(d)$ of the same form, decreasing
+in $d$, with $B_2(100)\le0.128161$ \checker{t3_master/t3_bounds.py}.
+\item \textbf{F} ($3\le d\le99$, $N\ge\max(m_0(d)d,d+1)$, $m=\lfloor N/d\rfloor$). (K3) with $q_0\ge m-1$; (M2) with $t_0=0,1,2$:
+$r_0\le\min(\frac12,R_m)$, $r_1\le\min(1,mR_m)$, $r_{A2}\le\min(1,m^2R_m/2)$ ($m\ge2$); $N\Mb(N-1,\ell)\le\Mb(N,\ell+1)\le M^\ast\min(2^{\ell+1-d},R_m^{d-1-\ell})$;
+$\varphi_X/M^\ast\le\max_{\ell\le d-a_X}\min(2^{\ell-d},R_m^{d-\ell})/(\binom\ell3+\ell)$. This gives $S_3\le E_3(d,m)$, nonincreasing in $m$. The minimal
+$m_0$ with $E_3(d,m_0)<1$ is $4$ ($d=3$), $3$ ($4\le d\le7$), $2$ ($8\le d\le14$), $1$ ($15\le d\le99$), and $\max_dE_3(d,m_0)\le0.968498$
+\checker{t3_master/t3_bounds.py}.
+\item \textbf{Finite} ($3\le d\le99$, $N<\max(m_0d,d+1)$): 4774 pairs, $S_3(d,k)$ evaluated with exact rational $\kappa$'s and interval square roots.
+$S_3<1$ except at 18 pairs; the largest value below 1 is $\le0.970559$ at $(7,4)$ \checker{t3_master/t3_bounds.py}.
+\item \textbf{The 18 residual pairs} $(d,k)\in\{(3,1)$, $(4,1)$, $(4,2)$, $(5,1)$, $(5,2)$, $(6,1)$, $(6,2)$, $(6,3)$, $(7,1)$, $(7,2)$, $(7,3)$, $(8,1)$, $(8,3)$, $(8,4)$, $(9,5)$, $(10,6)$, $(11,7)$, $(12,8)\}$:
+each has an exact typed clique-LP certificate (Appendix~\ref{app:ca}) with bound $\le0.7717523470$ (attained at $(3,1)$) \checker{t3_clique_lp/check_torus_lp.py; cover: t3_master/check_t3_cover.py}.
+\end{itemize}
+\emph{Monotonicity used above.} In $B_1$ and $B_2$ every coefficient is a decreasing function of $d$: $\frac{2(d-1)}{\binom d3}=\frac{12}{d(d-2)}$,
+$\frac d{\binom d3}$, $\frac{d^2}{\binom d3}=\frac{6d}{(d-1)(d-2)}$, $\frac{d^2}{(d-1)\binom d3}$, $\frac3d$ and $\binom{d+2}3/\binom d3=\frac{(d+2)(d+1)}{d(d-1)}$, and
+$\binom{d+2}{3}/(\binom d3(\binom{d-2}3+d-2))$; the refined $\kappa$ bounds of (K3-0) increase as $t=k/d$ decreases, so $\theta_{\max}$ and every
+$1/\sqrt{\kappa\kappa'}$ decrease; and $1/(N-1)$, $1/\binom N3$ decrease in $N$. In $E_3(d,m)$ the $\kappa^{(m)}$ increase with $m$ (so $W$ increases and
+the $\theta$'s decrease), while $R_m$, $mR_m$ (ratio $(\frac m{m+1})^{m-1}\le1$), $m^2R_m/2$ for $m\ge2$ (ratio $(\frac m{m+1})^{m-2}\le1$; value $1$ at
+$m=2$, matching the value $1$ used at $m=1$) and $\min(2^{\ell-d},R_m^{d-\ell})$ are nonincreasing; so $E_3$ is nonincreasing in $m$.
+
+By Lemma~\ref{lem:cover}(2) the regions cover all $d\ge3$, $k\ge1$, and the supremum of the bounds is $\le0.970559\le0.9706$. \qed
+
+\subsection{Coverage of the \texorpdfstring{$(d,k)$}{(d,k)} domain and exact comparison with \texorpdfstring{$1$}{1}}\label{app:coverage}
+\begin{lemma}[Coverage]\label{lem:cover}
+Let $m_0^{(2)}(d)$ and $m_0^{(3)}(d)$ be the tables of T2.6 and T3.4. (1) For $T=2$, every pair $(d,k)$ with $d\ge3$, $k\ge1$ lies in Region I,
+Region II, Region II$'$ or the finite remainder of T2.6, and the hypotheses used for the bound of that region hold there. (2) For $T=3$, every pair
+with $d\ge3$, $k\ge1$ lies in U1, U2, F or the finite set of T3.4, and the hypotheses of that region hold there.
+\end{lemma}
+\begin{proof}
+(1) Fix $d\ge3$ and let $N=k+2$, $q_0=\lfloor k/d\rfloor$. If $d\ge40$: $k\le d-2$ is Region I and $k\ge d-1$ is Region II. If $20\le d\le39$: $k\le d-2$
+is finite and $k\ge d-1$ is Region II. If $3\le d\le19$: $k\le d-2$ and $d-1\le k\le(m_0+1)d-3$ are finite, and $k\ge(m_0+1)d-2$ is Region II$'$.
+In each case the listed ranges partition $\{k\ge1\}$, so there is no gap at any boundary. Hypotheses: Region I uses $k\le d-2$, i.e.\ $N\le d$ and
+$M^\ast=N!$. Region II uses $N\ge d+1$, which is $k\ge d-1$. Region II$'$ uses $N\ge d+1$ and $m:=\lfloor N/d\rfloor\ge m_0+1$, both from
+$N\ge(m_0+1)d\ge2d$; it also uses $q_0\ge m-1$, which holds since $N=q_0d+s+2$ with $0\le s\le d-1$ gives $N<(q_0+2)d$. Then (K) gives
+$\kappa_B\ge(\frac{q_0+1}{q_0+2})^2\ge(\frac m{m+1})^2=\kappa_B^{(m)}$ and $\kappa_A\ge\kappa_A^{(m)}$ ($x\mapsto x/(x+1)$ and $x\mapsto x^2/((x+1)(x+2))$
+are increasing), so $S\le E_2(d,m)\le E_2(d,m_0)$ by the monotonicity in $m$ proved in T2.6.
+
+(2) Fix $d\ge3$, $N=k+3$. If $d\ge100$: $k\le d-3$ ($N\le d$) is U1 and $k\ge d-2$ ($N\ge d+1$) is U2. If $3\le d\le99$: $N<\max(m_0d,d+1)$ is the finite
+set and $N\ge\max(m_0d,d+1)$ is F. Again these partition $\{k\ge1\}$. U1 uses $N\le d$ (so $M^\ast=N!$ and (K3-0) apply); for $k<12$ the bound
+$B_1(d,k)$ is decreasing in $d$ (the refined $\kappa$ bounds increase as $t=k/d$ decreases, and every coefficient is decreasing in $d$), so it
+suffices to evaluate it at $d=\max(100,k+3)=100$; for $k\ge12$ the crude-constant bound is decreasing in $d$ and in $N$, so it suffices to evaluate it
+at $(d,N)=(100,15)$. U2 uses $N\ge d+1$ for (M1) and (J3$'$). F uses $N\ge d+1$, $m=\lfloor N/d\rfloor\ge m_0$, and $q_0\ge m-1$, which holds since
+$N=q_0d+s+3<(q_0+2)d$ for $d\ge3$; then $S_3\le E_3(d,m)\le E_3(d,m_0)$.
+\end{proof}
+
+\paragraph{The checkers enumerate exactly these sets.} \nolinkurl{t2_interval/check_t2.py} evaluates $S(d,k)$ on
+\texttt{[(d,k) for d in range(3,40) for k in range(1,d-1)]} $\cup$ \texttt{[(d,k) for d in range(3,20) for k in range(d-1,(m0[d]+1)*d-2)]},
+i.e.\ on $\{3\le d\le39,\ k\le d-2\}\cup\{3\le d\le19,\ d-1\le k\le(m_0+1)d-3\}$, the finite remainder of Lemma~\ref{lem:cover}(1) (1021 pairs).
+\nolinkurl{t3_master/t3_bounds.py} evaluates $S_3(d,k)$ on \texttt{range(1, max(m0[d]*d, d+1) - 3)} for $3\le d\le99$, i.e.\ $1\le k\le\max(m_0d,d+1)-4$,
+which is $N<\max(m_0d,d+1)$ (4774 pairs). The tables $m_0^{(2)}$ ($4,3,3$ for $d=3,4,5$; $2$ for $6\le d\le16$; $1$ for $17\le d\le19$) and
+$m_0^{(3)}$ ($4$ for $d=3$; $3$ for $4\le d\le7$; $2$ for $8\le d\le14$; $1$ for $15\le d\le99$) are recomputed by the checkers as the least $m$
+with an interval upper bound $<1$ and compared with the stored data. An independent audit script, \nolinkurl{coverage_check.py} (shipped as a separate ancillary file next to \texttt{ca\_appendix.zip}, so the
+archive hash is unchanged; SHA-256 \texttt{c42d11f652ed0bdd7daec55dd4bb9940319a8ff138c7f7d59956eacfa9ef0995}; it imports the shipped
+checkers unmodified and takes the path of the unzipped archive as its argument; re-run independently in QH-Lab with output identical to the
+original run), confirms on the box $3\le d<400$, $1\le k<1200$ that the enumerated sets equal the analytic definitions, that every pair lies
+in some region, and that the region hypotheses ($N\ge d+1$, $N\le d$, $m\ge m_0$, $q_0\ge m-1$) hold pairwise; it also spot-checks the
+monotonicity claims ($E_1,E_2^u$ in $d\le2000$; $E_2,E_3$ in $m\le60$, $m\le40$; $B_1,B_2$ in $d$) and evaluates the master bounds directly on
+the boundary layers of every analytic region ($208$ pairs at $T=2$, max $S\le0.45272$; $206$ pairs at $T=3$, max $S_3\le0.33983$). These spot checks are
+consistency checks [Num]; the monotonicity statements themselves are proved in T2.6, T3.4 and above.
+
+\paragraph{Exact comparison with $1$; outward decimals.} Every certified inequality is decided exactly. In \nolinkurl{check_t2.py} and
+\nolinkurl{t3_bounds.py} each bound is an \texttt{mpmath.iv} interval built from exact rationals (\texttt{fractions}), and the test is
+\texttt{v.b < 1} on the upper endpoint, a binary floating-point number compared exactly with $1$. In \nolinkurl{check_torus_lp.py} the bound is a
+\texttt{Fraction} (upper integer-square-root brackets in numerators, lower brackets in $\Lambda_0$), and the test \texttt{bound <= 1} is exact; the
+bookkeeping script \nolinkurl{check_t3_cover.py} reads the printed LP bounds, which are rounded \emph{up} (\texttt{math.ceil} at $10^{-10}$). The decimals
+printed by \nolinkurl{check_t2.py} and \nolinkurl{t3_bounds.py} are round-to-nearest; the constants quoted in this appendix are instead outward
+(ceil) roundings of the interval upper endpoints: $0.741501$, $0.790052$, $0.977398$, $0.996011$, $0.679481$ ($T=2$); $0.301833$, $0.270687$, $0.128161$,
+$0.968498$, $0.970559$, $0.7717523470$ ($T=3$). Their maxima give Theorem~\ref{thm:packing}(c) $\rho\le0.996011\le0.9961$ and (d) $\rho\le0.970559\le0.9706$.
+
+\paragraph{What is computer-assisted.} In (c): the five evaluations C1--C5 (the 13 residual pairs at $T=2$ are closed by the interval
+Lagrangian bound C5, not by clique-LP certificates). In (d): the constants of U1, U2 and F, the 4774 interval evaluations, and the 18 clique-LP
+certificates. Everything else in this appendix, including (a), (b), the monotonicity statements and the
+validity of every bound evaluated, is proved above.
+
+\section{Proof of Lemma~\ref{lem:R}}\label{app:lemR}
+\emph{Primal and dual.} With $J$ the Choi operator of a channel $\Sym^T\to\Sym^{T+k}$, $P_K(T,k)=\max\{\tr(JX):J\succeq0,\ \tr_{\rm out}J=I\}$,
+where $X=\E_x v_xv_x^\dagger$ and $v_x=\bar\psi_x^{\otimes T}\otimes\psi_x^{\otimes(T+k)}$. The dual is $\min\{\tr Y:Y\otimes I\succeq X\}$.
+$J=I/D_{T+k}$ is strictly feasible, so strong duality holds and the dual optimum is attained (Slater).
+
+\emph{Sector form of $X$.} In the orthonormal occupation bases, $\psi_x^{\otimes m}=d^{-m/2}\sum_{|\gamma|=m}c_\gamma\,\omega^{x\,K\cdot\gamma}\ket\gamma$
+with $c_\gamma=\sqrt{\mult(\gamma)}$ and $K\cdot\gamma=\sum_i\gamma_ik_i$. Hence $v_x=d^{-(2T+k)/2}\sum_{\alpha,\beta}c_\alpha c_\beta\,
+\omega^{x\,K\cdot(\beta-\alpha)}\ket{\alpha,\beta}$, and $\E_x\omega^{x(u-u')}=[u\equiv u']$ gives
+$X=\sum_{s\in\Z_q}\ket{w_s}\bra{w_s}$ with $w_s=d^{-(2T+k)/2}\sum_{K\cdot(\beta-\alpha)\equiv s}c_\alpha c_\beta\ket{\alpha,\beta}$.
+
+\emph{Block structure of $Y$.} Let $V_x=\bar U_x^{\otimes T}\otimes U_x^{\otimes(T+k)}$ with $U_x=\mathrm{diag}(\omega^{xk_j})$. Then $V_xXV_x^\dagger=X$, so if $Y$
+is feasible then so is $\bar U_x^{\otimes T}Y(\bar U_x^{\otimes T})^\dagger$, and so is their average $\bar Y$, with the same trace. $\bar Y$ commutes
+with every $\bar U_x^{\otimes T}$, which acts on $\ket\alpha$ by the phase $\omega^{-x\,K\cdot\alpha}$; hence $\bar Y=\bigoplus_wY_w$ is block diagonal over the
+classes $A_w=\{\alpha:K\cdot\alpha\equiv w\}$. We assume this form.
+
+\emph{Reduction to scalar constraints.} The space splits into blocks $B_{w,\beta}=\mathrm{span}\{\ket{\alpha,\beta}:\alpha\in A_w\}$, on which
+$Y\otimes I$ acts as $Y_w$. The vector $w_s$ meets block $B_{w,\beta}$ iff $K\cdot\beta-w\equiv s$, and there its component is
+$d^{-(2T+k)/2}c_\beta v_w$ with $v_w=\sum_{\alpha\in A_w}c_\alpha\ket\alpha$; each block meets exactly one $w_s$. So $Y\otimes I-X$ is a direct sum, over
+$s$, of $\bigoplus_{(w,\beta):K\cdot\beta-w\equiv s}Y_w$ minus the rank-one term $\ket{w_s}\bra{w_s}$. For $D\succeq0$ and a vector $u$,
+$D\succeq uu^\dagger$ iff $u\in\mathrm{range}(D)$ and $u^\dagger D^+u\le1$ (Schur complement). Writing $g_w=v_w^\dagger Y_w^+v_w$ (and $g_w=+\infty$ if
+$v_w\notin\mathrm{range}(Y_w)$), and using $\sum_{\beta:K\cdot\beta\equiv u}c_\beta^2=r_{T+k}(u)$ (each ordered $(T+k)$-tuple with sum $u$ is counted once
+through its multiset), feasibility becomes
+\[
+d^{-(2T+k)}\sum_w r_{T+k}(s+w)\,g_w\le1\qquad\forall s\in\Z_q .
+\]
+Classes with $A_w=\emptyset$ do not occur, and for them $r_T(w)=0$.
+
+\emph{Objective.} For $Y_w\succeq0$ and $v_w\in\mathrm{range}(Y_w)$, Cauchy--Schwarz gives
+$\lVert v_w\rVert^4=(v_w^\dagger Y_w^{1/2}\,Y_w^{+1/2}v_w)^2\le(v_w^\dagger Y_wv_w)\,g_w\le\tr(Y_w)\lVert v_w\rVert^2g_w$, so
+$\tr Y_w\ge\lVert v_w\rVert^2/g_w=r_T(w)/g_w$, with equality for $Y_w=v_wv_w^\dagger/g_w$. Since $g_w$ enters the constraints only through
+$g_w$ itself, minimising $\tr Y$ is the same as minimising $\sum_wr_T(w)/z_w$ over $z_w=g_w>0$ subject to the displayed constraints. This is
+Lemma~\ref{lem:R}.\qed
+
+\section{Computer-assisted steps}\label{app:ca}
+
+\paragraph{Package and integrity.}
+All computer-assisted (CA) steps are packaged as \texttt{ca\_appendix.zip}, distributed as arXiv ancillary files and in the Zenodo record that accompanies this paper~\cite{QHLab}.
+Its SHA-256 is
+\begin{center}\footnotesize\texttt{e77e131bdd7becb0822ed582ccfc0a9e43b4b9183aeab37e65bec3e64d888b30}.\end{center}
+The archive contains eight claim folders, a shared checker (\texttt{common/check\_torus\_lp.py}), the scripts that generated the certificates (\texttt{generators/}), and a \texttt{SHA256SUMS} file with 32 entries. The coverage audit \texttt{coverage\_check.py} (SHA-256 \texttt{c42d11f652ed0bdd7daec55dd4bb9940319a8ff138c7f7d59956eacfa9ef0995})
+ships as a separate ancillary file next to the archive; see Appendix~\ref{app:coverage}.
+After unzipping, \texttt{sha256sum -c SHA256SUMS} verifies every file.
+Requirements: Python $\ge3.10$, \texttt{mpmath}, and \texttt{python-flint} 0.9.0. The clique-LP checker needs only the Python standard library.
+
+\paragraph{Trust model.}
+Every checker is standalone. It uses only exact rational arithmetic (\texttt{fractions}, with integer square roots for irrational quantities), interval arithmetic (\texttt{mpmath.iv}), or ball arithmetic (\texttt{python-flint} \texttt{arb}).
+No checker calls an LP, SDP or ODE solver, NumPy or SciPy.
+The certificates in \texttt{cert.json} and \texttt{*\_data.json} were produced by floating-point generators (HiGHS for the clique LPs) in \texttt{generators/}. They are \emph{data only}: weak duality makes any nonnegative multiplier valid, so correctness rests on the checkers alone.
+The package was re-run independently on a separate machine as part of QH-Lab~\cite{QHLab} (v1.1.0, 49 automated tests), an independent Python re-implementation of the paper's tabulated values and
+worked examples. The archive hash and all 32 internal hashes matched, and every checker's output was identical to the shipped \texttt{expected\_output.txt}. The three long clique-LP folders were run in resumable chunks, and their per-case lines were byte-identical.
+
+\paragraph{The clique-LP checker (\texttt{check\_torus\_lp.py}).}
+If two shifts $\Delta,\Delta'$ both lie within $\ell_1$-distance $T+k$ of a centre $c\in B_T$, then $\lVert\Delta-\Delta'\rVert_1\le2(T+k)$, which contradicts the separation condition (ii). Hence each such ball contains at most one family member, and for every $\mu\ge0$ on centres,
+\[
+\rho(F)=\sum_{\Delta\in F}r_\Delta\le\sum_c\mu_c+\sum_\Delta\max\Big(0,\,r_\Delta-\sum_{c:\lVert\Delta-c\rVert_1\le T+k}\mu_c\Big),
+\qquad r_\Delta=\Lambda(\Delta)/\Lambda_0 .
+\]
+The certificate $\mu$ is a rational function of the centre's type.
+The checker brackets the weights $a_b$ by integer square roots at scale $10^{30}$, using upper brackets in numerators and lower brackets in $\Lambda_0$.
+It computes $Z_b$ exactly via elementary symmetric polynomials, enumerates shift types independently of the generator, and compares the final bound with $1$ exactly.
+Members with $n(\Delta)=0$ cannot occur when $|F|\ge2$ (Lemma~S).
+The checker also verifies $r_\Delta<1$ for unbalanced $\Delta\ge0$. This is redundant given~\cite[Prop.~X.5, Eq.~(148)]{Herasymenko2026}.
+
+\subsection*{Folder-by-folder description}
+Runtimes are wall-clock times on a single CPU core and are indicative only.
+
+\paragraph{\texttt{t2\_interval} (Theorem T2).}
+\emph{Claim:} steps C1--C5 of the proof of Theorem~T2 ($T=2$, all $d\ge3$, $k\ge1$; $\rho(F)\le0.9961$).
+\emph{Method:} the claim splits into three parts.
+\begin{itemize}
+\item C1--C3 evaluate the closed-form region bounds $E_1(40)$, $E_2^u(20)$ and $E_2(d,m_0)$.
+\item C4 evaluates $S(d,k)$ in interval arithmetic on 1021 finite pairs, with exact rational $\mathrm{avg}_A,\mathrm{avg}_B$. $S<1$ except at 13 pairs.
+\item C5 evaluates the Lagrangian bound at the 13 residual pairs with stored multipliers $\lambda\ge0$.
+\end{itemize}
+\emph{Checker:} \texttt{python3 check\_t2.py} (reads \texttt{t2\_data.json}; uses Fractions and \texttt{mpmath.iv}).
+\emph{Output:} C1 $0.741501$, C2 $0.790052$, C3 $\max 0.977398$, C4 $\max_{<1}0.996011$ at $(9,6)$, C5 $\max 0.679481$; final line \texttt{THEOREM T2 COMPUTATIONAL STEPS: PASS ; overall sup bound <= 0.9960} (this line is printed round-to-nearest; the
+outward-rounded value is $0.996011$, and the PASS test itself compares the interval upper endpoint with $1$ exactly).
+\emph{Runtime:} about 5\,s.
+
+\paragraph{\texttt{t3\_master} (Theorem T3, analytic part).}
+\emph{Claim:} the constants of the region reduction for Theorem~T3 ($T=3$, all $d\ge3$, $k\ge1$; $\rho(F)\le0.9706$). These are U1 (refined $0.301833$, crude $0.2707$), U2 ($0.1282$), and the $m_0$ table with $\max E_3=0.9685$.
+\emph{Method:} the checker evaluates $S_3(d,k)$ on 4774 finite pairs with exact $\kappa$ and interval square roots. $S_3<1$ except at 18 pairs, and the maximum below $1$ is $0.97056$ at $(7,4)$. A bookkeeping script then checks that the 18 residual pairs are covered by \texttt{t3\_clique\_lp}.
+\emph{Checker:} \texttt{python3 t3\_bounds.py 100 12 \&\& python3 check\_t3\_cover.py}. The cover check reads \texttt{t3\_bounds\_DU100.json}.
+\emph{Output:} \texttt{t3\_bounds.py} ends with \texttt{analytic regions OK: True}; \texttt{check\_t3\_cover.py} prints \texttt{residual pairs: 18 ; max verified LP bound on them: 0.7717523470} and \texttt{THEOREM T3 (all d>=3, k>=1) COMPUTATIONAL STEPS: PASS}.
+\emph{Runtime:} about 3\,s.
+
+\paragraph{\texttt{t3\_clique\_lp} (Theorem T3, exact cases).}
+\emph{Claim:} the packing inequality at $T=3$ for $d=2,\dots,12$ with $k\le20$ and for $d=13,\dots,20$ with $k\le12$ (316 cases). This range includes the 18 residual pairs of \texttt{t3\_master}.
+\emph{Method:} typed clique-LP certificates with rational $\mu$.
+\emph{Checker:} \texttt{python3 check\_torus\_lp.py cert.json}.
+\emph{Output:} \texttt{CASES=316~~MAX\_BOUND<=0.7717523470~~ALL\_PASS=True}. The maximum is attained at $(d,k)=(3,1)$, where the exact value is $0.77175235$.
+\emph{Runtime:} about 3\,min.
+
+\paragraph{\texttt{clique\_lp\_d16\_Tk5} (certified region).}
+\emph{Claim:} the packing inequality for $d\le16$ and $T+k\le5$ (150 cases).
+\emph{Checker:} as above.
+\emph{Output:} \texttt{CASES=150~~MAX\_BOUND<=0.8403003465~~ALL\_PASS=True}.
+\emph{Runtime:} about 3\,s.
+
+\paragraph{\texttt{d3\_T60} (certified region, $d=3$).}
+\emph{Claim:} the packing inequality for $d=3$, $T\le40$ with $k\le3$, and $T=41,\dots,60$ with $k=1$ (140 cases).
+\emph{Checker:} as above.
+\emph{Output:} \texttt{CASES=140~~MAX\_BOUND<=0.9991923171~~ALL\_PASS=True}. The maximum is at $T=60$, consistent with $1-\max\rho\approx2.9/T^2$.
+\emph{Runtime:} about 1\,min.
+
+\paragraph{\texttt{t45\_clique\_lp} (evidence for Conjecture TT).}
+\emph{Claim:} the packing inequality at $T=4$ for $d=3,\dots,10$ with $k\le12$ and $d=11,\dots,14$ with $k\le10$, and at $T=5$ for $d=3,\dots,9$ with $k\le6$ (178 cases).
+\emph{Checker:} as above.
+\emph{Output:} \texttt{CASES=178~~MAX\_BOUND<=0.8866406634~~ALL\_PASS=True}.
+\emph{Runtime:} about 2\,min.
+
+\paragraph{\texttt{su3\_cert} (SU(3) counterexample).}
+\emph{Claim:} for $H=SU(3)$ acting on $V=\mathrm{Sym}^2\mathbb{C}^3$ and the Hessian group $G$ (216 elements modulo phases), at $(T,k)=(1,1)$ there is a $G$-orbit $X$ whose imposed moment is matched exactly to that of the $H$-orbit, yet $P_X-P_H\ge8.0399\times10^{-4}$, i.e.\ the finite orbit does not attain the continuous optimum.
+\emph{Method:} ball arithmetic (\texttt{arb}, 256 bits). The checker certifies four things.
+\begin{itemize}
+\item Group closure by breadth-first search.
+\item Commutant dimension and projector traces.
+\item A Rayleigh lower bound on $P_X$ and a congruence-plus-Gershgorin upper bound on $P_H$.
+\item An exactly moment-matched fiducial, found by Poincar\'e--Miranda on a preconditioned degree-$\le4$ map, with matching loss $\le8.15\times10^{-10}$.
+\end{itemize}
+\emph{Checker:} \texttt{python3 check\_su3.py} (reads \texttt{su3\_data.json}).
+\emph{Output:} \texttt{gap\_lower [0.000803995920422 +/- 1.42e-16]~\textbar{}~matching\_loss\_upper [8.14587e-10 +/- 1.20e-17]~\textbar{}~PASS True}.
+\emph{Runtime:} about 4\,s.
+
+\paragraph{\texttt{spin1\_cert} (spin-1 counterexample).}
+\emph{Claim:} the analogous strict gap for $SU(2)$ spin~1 with the octahedral group: an exactly moment-matched orbit with $P_X-P_H\ge6.437\times10^{-4}$.
+\emph{Method:} ball arithmetic. The checker certifies group closure and the character check $\sum\chi^2/24=3$, the quadrature weights, and a Cholesky factorisation (minimum pivot $1.76\times10^{-12}$). It then certifies $P_X\ge0.516520734$ and $P_H\le0.515877020$, together with an intermediate-value sign change of the matching function, with loss bound $72\delta/\lVert f\rVert$.
+\emph{Checker:} \texttt{python3 check\_spin1.py} (reads \texttt{spin1\_data.json}).
+\emph{Output:} \texttt{gap\_lower [0.000643714380356 +/- 8.01e-17]~\textbar{}~matching\_loss\_upper [7.20000e-12 +/- 1e-22]~\textbar{}~PASS True}.
+\emph{Runtime:} about 1\,s.
+
+\subsection*{File hashes}
+The six LP-folder copies of \texttt{check\_torus\_lp.py} are identical, including the copy in \texttt{common/}.
+\begin{Verbatim}[fontsize=\scriptsize]
+284885f682aa287943b2c356a01a61856ef8c19524c5491db3f65ca5530ef953  ./README.md
+500fce4cabd10a639a457f56c28bb74d4ec3de8ae9c6b99f65b4d585c7a05da4  ./clique_lp_d16_Tk5/cert.json
+abded76dbc9664403bef3f1d353e49dcf563c44d781bfcaee7c75ceab406b933  ./clique_lp_d16_Tk5/check_torus_lp.py
+41de447e1afec21d4b7e453fe815417551b20043821da916d72afaaabd12b116  ./clique_lp_d16_Tk5/expected_output.txt
+abded76dbc9664403bef3f1d353e49dcf563c44d781bfcaee7c75ceab406b933  ./common/check_torus_lp.py
+4e1f176b9f97c453d60f773489a15b849edbd0c94d302b2bd68979da383527df  ./d3_T60/cert.json
+abded76dbc9664403bef3f1d353e49dcf563c44d781bfcaee7c75ceab406b933  ./d3_T60/check_torus_lp.py
+5fd48d2606e58d791a83493d76217d505f84d9a7c4f4d7eb0b1555ce16ee88d9  ./d3_T60/expected_output.txt
+ee6920ce4bd8a0cd6edd90e544fce29ec03cfbbb9cba01cce9e47130afcf1197  ./generators/export_spin1.py
+477f525cf30c19038bdbaf8cc8ff461a2dd512004a191b94b18699169f18ddb0  ./generators/export_su3.py
+a48637ace29fbc91df98df07c256343b52d97923713159fbb62ca2e4ba825d27  ./generators/gen_torus_cert.py
+b26f05d6859912e7be78c57b585e8a3a759bde9cceb864de784db722ef229d22  ./spin1_cert/check_spin1.py
+98b6358ed32b875426b787b4d93b8c56bc248ec77006fd79a74411c6af232dc9  ./spin1_cert/expected_output.txt
+496edcc41b5d150ee90c63fcc29b31b02be017b7d11143959f5749a0ca0a211c  ./spin1_cert/spin1_data.json
+5cbce2c9ec3e80c90c817b18edcbfc6c49e7d76d40adb2dcba7de4585afaf75b  ./su3_cert/check_su3.py
+2d3c3b46dc642108bbb9c5aba17085c691f83749b246e0ddc247b813dacd8ae5  ./su3_cert/expected_output.txt
+54c1af221db10d21f91acd5f29a30ad47502fb7547e4a8c668b171c2ea1b0741  ./su3_cert/su3_data.json
+7360fcb026a4cda4d0d39f2c7c1083518b8248c1c6caad9b0118b4436629e89e  ./t2_interval/check_t2.py
+90ab1ee6f5472d41083fb15fce1771f9274145dbb72db688cd8735c75d40ccf4  ./t2_interval/expected_output.txt
+4378b2d4ab43a82bade4c561fc1afc2723660e96ed0dc37ae6540b9dd9015481  ./t2_interval/make_t2_data.py
+0912d57c75d71e7d445dea4670ef0dcfda87733cfd7d7c70fe55e4ae418045e0  ./t2_interval/t2_data.json
+67dc7fbdf256efa51084eae5f6f3a742a625b2306783727b498701e360e27b0b  ./t3_clique_lp/cert.json
+abded76dbc9664403bef3f1d353e49dcf563c44d781bfcaee7c75ceab406b933  ./t3_clique_lp/check_torus_lp.py
+baefcd6d59d5e11c9d0551a8f6fe19e96bcb38bd06d7ac3dcbee89d560112272  ./t3_clique_lp/expected_output.txt
+85399ef85a3e8cfeac493191cfedbd367fb5a70dd0641c3b0108bb2feab88566  ./t3_master/check_t3_cover.py
+6d701bf17296510b8b30e84a34a0e12e99bebc307f4aa3f6515bd1ce59dc6859  ./t3_master/expected_cover_output.txt
+00b9ff2e859e361127357a94639a7a1f038eea6919d69ace09613034976bb9d5  ./t3_master/expected_output.txt
+3dcbb1beee39b34f72436241aacf60c426fe231dfb17b0caa74db7c3e6335235  ./t3_master/t3_bounds.py
+59338e4eea8d368305114056617ff9ca07de8f006d1a2503cbb38f5c00c60b96  ./t3_master/t3_bounds_DU100.json
+077f931afb2e786692ab2733cff53c556f4615e5e33c2d16c998973d446b7d95  ./t45_clique_lp/cert.json
+abded76dbc9664403bef3f1d353e49dcf563c44d781bfcaee7c75ceab406b933  ./t45_clique_lp/check_torus_lp.py
+6278e682a9d6a6e9d2c71121d242fa7aead8ee6e1c98f964ec32e1a5281a3506  ./t45_clique_lp/expected_output.txt
+\end{Verbatim}
+
+\end{document}
