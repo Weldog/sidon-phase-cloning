@@ -1,0 +1,95 @@
+\begin{thebibliography}{16}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Werner(1998)]{Werner1998}
+R.~F. Werner.
+\newblock Optimal cloning of pure states.
+\newblock \emph{Phys. Rev. A}, 58:\penalty0 1827--1832, 1998.
+\newblock \doi{10.1103/PhysRevA.58.1827}.
+
+\bibitem[Herasymenko et~al.(2026)Herasymenko, Lin, Verduyn~Lunel, and
+  Grinko]{Herasymenko2026}
+Y.~Herasymenko, J.~Lin, P.~Verduyn~Lunel, and D.~Grinko.
+\newblock Approximate cloning of structured pure states, 2026.
+
+\bibitem[Bansal et~al.(2026)Bansal, Caro, and Mahajan]{Bansal2026}
+N.~Bansal, M.~C. Caro, and G.~Mahajan.
+\newblock Cloning is as hard as learning for stabilizer states.
+\newblock In \emph{Proceedings of the Thirty-Ninth Conference on Learning
+  Theory}, volume 336 of \emph{Proceedings of Machine Learning Research}, pages
+  505--558. PMLR, 2026.
+
+\bibitem[Jeon et~al.(2026)Jeon, Sohn, and Oh]{JeonSohnOh2026}
+S.~Jeon, V.~Sohn, and C.~Oh.
+\newblock Optimal copy complexity of quantum state cloning, 2026.
+
+\bibitem[Kueng and Gross(2015)]{KuengGross2015}
+R.~Kueng and D.~Gross.
+\newblock Qubit stabilizer states are complex projective 3-designs, 2015.
+
+\bibitem[Zhu et~al.(2016)Zhu, Kueng, Grassl, and Gross]{ZKGG2016}
+H.~Zhu, R.~Kueng, M.~Grassl, and D.~Gross.
+\newblock The {C}lifford group fails gracefully to be a unitary 4-design, 2016.
+
+\bibitem[Weldon(2026)]{WeldonP2}
+M.~Weldon.
+\newblock Universal cloning is optimal exactly for designs.
+\newblock Zenodo preprint, 2026.
+
+\bibitem[Gross et~al.(2021)Gross, Nezami, and Walter]{GNW2021}
+D.~Gross, S.~Nezami, and M.~Walter.
+\newblock Schur--{W}eyl duality for the {C}lifford group with applications:
+  property testing, a robust {H}udson theorem, and de {F}inetti
+  representations.
+\newblock \emph{Commun. Math. Phys.}, 385:\penalty0 1325--1393, 2021.
+\newblock \doi{10.1007/s00220-021-04118-7}.
+
+\bibitem[Hayashi and Lu(2026)]{HayashiLu2026}
+M.~Hayashi and Y.~Lu.
+\newblock Exact critical curve for uniform stabilizer-state identification,
+  2026.
+
+\bibitem[Zhu(2017)]{Zhu2017}
+H.~Zhu.
+\newblock Multiqubit {C}lifford groups are unitary 3-designs.
+\newblock \emph{Phys. Rev. A}, 96:\penalty0 062336, 2017.
+\newblock \doi{10.1103/PhysRevA.96.062336}.
+
+\bibitem[Webb(2016)]{Webb2016}
+Z.~Webb.
+\newblock The {C}lifford group forms a unitary 3-design.
+\newblock \emph{Quantum Inf. Comput.}, 16:\penalty0 1379--1400, 2016.
+\newblock \doi{10.26421/QIC16.15-16-8}.
+
+\bibitem[Montanaro(2017)]{Montanaro2017}
+A.~Montanaro.
+\newblock Learning stabilizer states by {B}ell sampling, 2017.
+
+\bibitem[Chang et~al.(2026)Chang, Caro, Larocca, and West]{Chang2026}
+R.~Chang, M.~C. Caro, M.~Larocca, and M.~West.
+\newblock Sample-optimal learning of stabilizer states, 2026.
+
+\bibitem[Hayashi et~al.(2026)Hayashi, Zhao, and Yu]{HayashiZhaoYu2026}
+M.~Hayashi, J.~Zhao, and B.~Yu.
+\newblock Stabilizer-public-key authentication: long stabilizer public keys
+  resist finite-copy forgery attacks, 2026.
+
+\bibitem[Montealegre-Mora and Gross(2021)]{MMGross2021}
+F.~Montealegre-Mora and D.~Gross.
+\newblock Rank-deficient representations in the theta correspondence over
+  finite fields arise from quantum codes.
+\newblock \emph{Represent. Theory}, 25:\penalty0 193--223, 2021.
+\newblock \doi{10.1090/ert/563}.
+
+\bibitem[Bittel et~al.(2026)Bittel, Eisert, Leone, Mele, and
+  Oliviero]{Bittel2026}
+L.~Bittel, J.~Eisert, L.~Leone, A.~A. Mele, and S.~F.~E. Oliviero.
+\newblock A complete theory of the {C}lifford commutant.
+\newblock \emph{Quantum}, 10:\penalty0 2171, 2026.
+\newblock \doi{10.22331/q-2026-07-22-2171}.
+
+\end{thebibliography}

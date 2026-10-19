@@ -1,0 +1,33 @@
+T=1 k=1 (1->2) t=3 w=1 F_(t-w)=2/(D*(D + 1)) orbits=2 eigdim=1 rho(B')=F(all D>=2)=True phi(y)!=0 fn=True pow2roots=[]  ==> CERT n=1..40: True  ALL n: True
+    eig(B') = ['2/(D*(D + 1)*(D + 2)) (mult 1)', '2/(D*(D + 1)) (mult 1)'] 
+    u' = ['1', '0'] 
+    s_r = ['D*(D + 1)**2/4', 'D*(D + 1)/2']
+T=0 k=3 (0->3) t=3 w=0 F_(t-w)=6/(D*(D + 1)*(D + 2)) orbits=1 eigdim=1 rho(B')=F(all D>=2)=True phi(y)!=0 fn=True pow2roots=[]  ==> CERT n=1..40: True  ALL n: True
+    eig(B') = ['6/(D*(D + 1)*(D + 2)) (mult 1)'] 
+    u' = ['1'] 
+    s_r = ['D*(D + 1)*(D + 2)/6']
+T=2 k=0 (2->2) t=4 w=2 F_(t-w)=2/(D*(D + 1)) orbits=4 eigdim=1 rho(B')=F(all D>=2)=True phi(y)!=0 fn=True pow2roots=[]  ==> CERT n=1..40: True  ALL n: True
+    eig(B') = ['8/(D*(D + 1)*(D + 2)*(D + 4)) (mult 1)', '4/(D*(D + 1)*(D + 2)) (mult 1)', '2/(D*(D + 1)*(D + 2)) (mult 1)', '2/(D*(D + 1)) (mult 1)'] 
+    u' = ['0', '0', '1', '0'] 
+    s_r = ['D*(D + 1)**2/4', 'D*(D + 1)/2', 'D**2*(D + 1)**2/4', 'D**2*(D + 1)/2']
+T=1 k=2 (1->3) t=4 w=1 F_(t-w)=6/(D*(D + 1)*(D + 2)) orbits=2 eigdim=1 rho(B')=F(all D>=2)=True phi(y)!=0 fn=True pow2roots=[]  ==> CERT n=1..40: True  ALL n: True
+    eig(B') = ['12/(D*(D + 1)*(D + 2)*(D + 4)) (mult 1)', '6/(D*(D + 1)*(D + 2)) (mult 1)'] 
+    u' = ['0', '1'] 
+    s_r = ['D*(D + 1)*(D + 2)/6', 'D*(D + 1)*(D + 2)**2/18']
+T=0 k=4 (0->4) t=4 w=1 F_(t-w)=6/(D*(D + 1)*(D + 2)) orbits=2 eigdim=1 rho(B')=F(all D>=2)=True phi(y)!=0 fn=True pow2roots=[]  ==> CERT n=1..40: True  ALL n: True
+    eig(B') = ['24/(D*(D + 1)*(D + 2)*(D + 4)) (mult 1)', '6/(D*(D + 1)*(D + 2)) (mult 1)'] 
+    u' = ['1', '0'] 
+    s_r = ['D**2*(D + 1)*(D + 2)/6', 'D*(D + 1)*(D + 2)/6']
+T=2 k=1 (2->3) t=5 w=2 F_(t-w)=6/(D*(D + 1)*(D + 2)) orbits=3 eigdim=1 rho(B')=F(all D>=2)=True phi(y)!=0 fn=True pow2roots=[]  ==> CERT n=1..40: True  ALL n: True
+    eig(B') = ['72/(D*(D + 1)*(D + 2)*(D + 4)*(D + 8)) (mult 1)', '18/(D*(D + 1)*(D + 2)*(D + 4)) (mult 1)', '6/(D*(D + 1)*(D + 2)) (mult 1)'] 
+    u' = ['0', '0', '1'] 
+    s_r = ['D*(D + 1)*(D + 2)**2/18', 'D*(D + 1)*(D + 2)/6', 'D*(D + 1)**2*(D + 2)**2/36']
+T=1 k=3 (1->4) t=5 w=1 F_(t-w)=30/(D*(D + 1)*(D + 2)*(D + 4)) orbits=2 eigdim=1 rho(B')=F(all D>=2)=True phi(y)!=0 fn=True pow2roots=[]  ==> CERT n=1..40: True  ALL n: True
+    eig(B') = ['120/(D*(D + 1)*(D + 2)*(D + 4)*(D + 8)) (mult 1)', '30/(D*(D + 1)*(D + 2)*(D + 4)) (mult 1)'] 
+    u' = ['0', '1'] 
+    s_r = ['D*(D + 1)*(D + 2)*(D + 4)/30', 'D*(D + 1)*(D + 2)*(D + 4)**2/150']
+T=0 k=5 (0->5) t=5 w=1 F_(t-w)=30/(D*(D + 1)*(D + 2)*(D + 4)) orbits=2 eigdim=1 rho(B')=F(all D>=2)=True phi(y)!=0 fn=True pow2roots=[]  ==> CERT n=1..40: True  ALL n: True
+    eig(B') = ['120/(D*(D + 1)*(D + 2)*(D + 4)*(D + 8)) (mult 1)', '30/(D*(D + 1)*(D + 2)*(D + 4)) (mult 1)'] 
+    u' = ['1', '0'] 
+    s_r = ['D*(D + 1)*(D + 2)*(D + 4)**2/150', 'D*(D + 1)*(D + 2)*(D + 4)/30']
+cert exit 0

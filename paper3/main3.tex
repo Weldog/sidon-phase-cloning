@@ -1,0 +1,374 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,array}
+\usepackage[hidelinks]{hyperref}
+\usepackage[numbers,sort&compress]{natbib}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\Sym}{\operatorname{Sym}}
+\newcommand{\Stab}{\operatorname{Stab}}
+\newcommand{\ket}[1]{\lvert #1\rangle}
+\newcommand{\bra}[1]{\langle #1\rvert}
+\newcommand{\one}{\mathbf 1}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\title{Exact Optimal Cloning of Stabilizer States}
+\author{Michael Weldon\\[2pt]
+\small Independent Researcher, Las Vegas, NV, USA\\
+\small ORCID: \href{https://orcid.org/0009-0001-6119-0560}{0009-0001-6119-0560}}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We determine the optimal average global fidelity of $T\to T+k$ approximate cloning for the uniform ensemble of
+$n$-qubit stabilizer states, for every number of qubits $n$, every $k\ge1$ and every $T\le3$. With $D=2^n$, the
+optimum is
+\[
+P_{\rm stab}(n;T,k)=\binom{D+T-1}{T}\,F_{T+k-\kappa(k)},\qquad
+F_s=\frac{\prod_{i=0}^{s-2}(2^i+1)}{D\prod_{i=0}^{s-2}(D+2^i)},
+\]
+where $F_s$ is the stabilizer frame potential and $\kappa(k)$ is the largest dimension of a doubly-even binary code
+of length $k$. The result rests on an exact formula for the largest eigenvalue of the mixed stabilizer moment
+operators $\E_S\,\ket S\!\bra S^{\otimes a}\otimes\ket{\bar S}\!\bra{\bar S}^{\otimes b}$: for all $a+b\ge1$ and all
+$n$ it equals $F_{a+b-w}$, where $w=\min(a,b)+\kappa(|a-b|)$ is the Witt index of an associated $\mathbb Z_4$-valued
+quadratic form. The proof works in the algebra of stochastic Lagrangian relations of Gross, Nezami and Walter, and
+needs neither a stable-range assumption nor the linear independence of the relation operators. Consequences: the
+universal cloner is optimal exactly when $T+k\le3$; the optimum stays constant as $k$ grows across the lengths at
+which $\kappa$ increases; and as $k\to\infty$ it converges to the optimal probability of identifying the state.
+\end{abstract}
+
+\section{Introduction}
+Werner determined the optimal global fidelity of cloning an unknown pure state~\cite{Werner1998}. For stabilizer states, Herasymenko et al.\ observe, in a trace-distance-oriented
+discussion, that the optimal cloning channel remains an open question~\cite{Herasymenko2026}, and Bansal, Caro and
+Mahajan establish the optimal constant-error cloning sample complexity $\Theta(n)$~\cite{Bansal2026}. Separately,
+Jeon, Sohn and Oh identify exact optimal fidelities beyond asymptotic scaling as an open problem for general
+mixed-state cloning~\cite{JeonSohnOh2026}. These results address different figures of merit or parameter regimes
+from the finite-copy average global fidelity considered here. Since stabilizer states form a complex projective 3-design but not a 4-design
+\cite{KuengGross2015,ZKGG2016}, Werner's universal cloner is optimal for them exactly when $T+k\le3$
+\cite{WeldonP2}. To our knowledge, no general closed formula had been established for the optimal average global fidelity of
+uniform $n$-qubit stabilizer-state cloning throughout the non-design regime $T+k\ge4$, for arbitrary $n$ and all
+$1\le T\le3$.
+
+We determine them. For $T\le3$, every $k$ and every $n$, the optimal average global fidelity is the closed form in the
+abstract (Corollary~\ref{cor:clone}); Table~\ref{tab:values} lists examples. The formula has two ingredients: the
+frame potential $F_s$ of random stabilizer states~\cite{GNW2021}\cite[Thm.~2]{KuengGross2015}, and the coding-theoretic quantity $\kappa(k)$, the
+largest dimension of a doubly-even binary code of length $k$. The appearance of $\kappa$ has a precise source: it is
+the Witt index of the $\mathbb Z_4$-valued quadratic form that indexes the relevant stabilizer moment.
+
+\begin{table}[ht]
+\centering\small
+\caption{Optimal $T\to T+k$ cloning fidelity of uniform $n$-qubit stabilizer states (Corollary~\ref{cor:clone}),
+with Werner's universal value in parentheses.}\label{tab:values}
+\begin{tabular}{@{}lccccc@{}}\toprule
+ & $n=1$ & $n=2$ & $n=3$ & $n=4$ & $n=5$\\\midrule
+$1\to4$ & $5/12\ (2/5)$ & $1/8\ (4/35)$ & $1/36\ (4/165)$ & $1/204\ (4/969)$ & $5/6732\ (4/6545)$\\
+$1\to5$ & $5/12\ (1/3)$ & $1/8\ (1/14)$ & $1/36\ (1/99)$ & $1/204\ (1/969)$ & $5/6732\ (1/11781)$\\
+$1\to6$ & $3/8\ (2/7)$ & $3/32\ (1/21)$ & $1/64\ (2/429)$ & $1/544\ (2/6783)$ & $1/5984\ (2/145299)$\\
+$2\to4$ & $5/8\ (3/5)$ & $5/16\ (2/7)$ & $1/8\ (6/55)$ & $1/24\ (2/57)$ & $5/408\ (6/595)$\\
+$2\to5$ & $9/16\ (1/2)$ & $15/64\ (5/28)$ & $9/128\ (1/22)$ & $1/64\ (1/114)$ & $3/1088\ (1/714)$\\
+$3\to4$ & $5/6\ (4/5)$ & $5/8\ (4/7)$ & $5/12\ (4/11)$ & $1/4\ (4/19)$ & $5/36\ (4/35)$\\
+$3\to5$ & $3/4\ (2/3)$ & $15/32\ (5/14)$ & $15/64\ (5/33)$ & $3/32\ (1/19)$ & $1/32\ (1/63)$\\\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Method.} For $T\le3$, Clifford symmetry reduces cloning to the largest eigenvalue of a mixed moment
+operator (Section~\ref{sec:reduction}). Gross, Nezami and Walter express stabilizer moments as sums over stochastic
+Lagrangian relations~\cite{GNW2021}; a partial transpose gives the mixed moments (Section~\ref{sec:moments}). We
+compute the top eigenvalue for every signature by passing to the abstract algebra of relations, where left
+multiplication by the moment is a nonnegative matrix whose column sums depend only on a ``defect level'' and are
+given exactly by frame potentials (Section~\ref{sec:main}). The top level is the Witt index, computed in
+Section~\ref{sec:witt}. Related exact work by Hayashi and Lu diagonalizes the stabilizer Gram operator for state
+identification~\cite{HayashiLu2026}; our argument does not use their spectral theorem. The
+moment identities~\cite{GNW2021}\cite[Lemma~6]{HayashiLu2026} and the frame potentials are known; what is new here
+is the top eigenvalue of the mixed moments (Theorem~\ref{thm:main}) and its consequence for cloning
+(Corollary~\ref{cor:clone}).
+
+\section{Setting and reduction}\label{sec:reduction}
+Let $D=2^n$, let $\Stab(n)$ be the set of $n$-qubit stabilizer states, $N_n=|\Stab(n)|=2^n\prod_{i=1}^n(2^i+1)$, and
+$D_m=\binom{D+m-1}{m}=\dim\Sym^m(\C^D)$. A $T\to T+k$ cloner is a channel $\Phi$ from operators on
+$\Sym^T(\C^D)$ to operators on $\Sym^{T+k}(\C^D)$. This loses no generality: all inputs lie in $\Sym^T(\C^D)$,
+and projecting the output of an unrestricted channel onto $\Sym^{T+k}(\C^D)$, replacing the complementary outcome by
+a fixed state in that subspace, gives a channel whose fidelity with every $\ket S^{\otimes(T+k)}$ is no smaller. Then
+\[
+P_{\rm stab}(n;T,k)=\max_\Phi\ \E_{S}\bra{S^{\otimes(T+k)}}\Phi\big(\ket S\!\bra S^{\otimes T}\big)\ket{S^{\otimes(T+k)}},
+\]
+with $S$ uniform on $\Stab(n)$. For $a,b\ge0$ define the mixed moment
+\[
+X^{(a,b)}=\E_S\,\ket S\!\bra S^{\otimes a}\otimes\ket{\bar S}\!\bra{\bar S}^{\otimes b}.
+\]
+
+\begin{lemma}[Reduction]\label{lem:red}
+For $1\le T\le3$ and $k\ge1$, $P_{\rm stab}(n;T,k)=D_T\,\lambda_{\max}\big(X^{(T+k,T)}\big)$. Moreover the optimum
+is attained by a Clifford-covariant channel, which has the same fidelity on every stabilizer state, so the average
+and worst-case optima coincide.
+\end{lemma}
+\begin{proof}
+Fix an orthonormal basis $\{e_c\}$ of $\Sym^T(\C^D)$ and write $s_c(S)=\langle e_c|S^{\otimes T}\rangle$. With the
+Choi operator $J=\sum_{c,c'}\Phi(\ket{e_c}\!\bra{e_{c'}})\otimes\ket c\!\bra{c'}$, the average fidelity is $\tr(JX)$
+with $X=\E_S vv^\dagger$, $v=S^{\otimes(T+k)}\otimes\sum_c\overline{s_c(S)}\ket c$. This $X$ is the compression of
+$X^{(T+k,T)}$ to $\Sym^{T+k}\otimes\overline{\Sym^T}$, which contains its support, so the two have the same nonzero
+spectrum. By semidefinite-programming duality (a strictly feasible point exists),
+$P_{\rm stab}=\min\{\tr Y: I\otimes Y\succeq X\}$, the minimum being attained. For a Clifford unitary $C$, $X$ is
+invariant under $C^{\otimes(T+k)}\otimes\bar C^{\otimes T}$, so averaging an optimal $Y$ over the Clifford group
+gives an optimal $Y$ commuting with the action of $\bar C$ on $\Sym^T$. For $T\le3$, the unitary 3-design property of the multiqubit Clifford group
+\cite{Zhu2017,Webb2016} implies that its twirl on $\operatorname{End}((\C^D)^{\otimes T})$ equals the Haar twirl; an
+operator commuting with the Clifford action on $\Sym^T(\C^D)$, extended by zero, is therefore fixed by the Haar twirl,
+and irreducibility of $\Sym^T(\C^D)$ under $\mathrm{U}(D)$ forces it to be scalar. Thus $Y=\lambda I$. The constraint is then
+$\lambda\ge\lambda_{\max}(X)$, giving $P_{\rm stab}=D_T\lambda_{\max}(X)$. Averaging an optimal channel over the
+(transitive) Clifford action gives a covariant optimal channel with equal fidelity on every stabilizer state.
+\end{proof}
+
+\section{Mixed moments as sums over Lagrangian relations}\label{sec:moments}
+Write $t=a+b\ge1$ and $V=\F_2^t$ with coordinates split into $A$ (the first $a$) and $B$ (the last $b$). Define the
+$\mathbb Z_4$-valued form $q_{a,b}(x)=|x_A|-|x_B| \bmod 4$, where $|\cdot|$ is the Hamming weight, and the dot product
+$\beta(x,y)=x\cdot y\bmod2$. Then $q(x+y)=q(x)+q(y)+2\beta(x,y)\pmod4$.
+
+\begin{definition}
+$\Sigma(q_{a,b})$ is the set of $t$-dimensional subspaces $U\subseteq V\oplus V$ such that
+$q_{a,b}(x)\equiv q_{a,b}(y)\pmod4$ for all $(x,y)\in U$, and $\one_{2t}=(\one_t,\one_t)\in U$. For $U\in\Sigma$ let
+$r(U)=\sum_{(x,y)\in U}\ket x\!\bra y$ on $(\C^2)^{\otimes t}$, $R(U)=r(U)^{\otimes n}$ (acting on
+$(\C^D)^{\otimes t}$ after reordering), $N_L(U)=\{x:(x,0)\in U\}$ and $N_R(U)=\{y:(0,y)\in U\}$.
+\end{definition}
+
+Every $U\in\Sigma$ is totally isotropic for $q\oplus-q$, hence for the polar form $\beta\oplus\beta$, and has
+dimension $t$, so $U=U^\perp$; in particular $\dim N_L(U)=\dim N_R(U)$, and both are totally isotropic for $q_{a,b}$.
+For $b=0$, $\Sigma(q_{t,0})$ is the set $\Sigma_{t,t}$ of Gross--Nezami--Walter~\cite[Def.~4.1]{GNW2021}.
+
+\begin{lemma}[Mixed moments]\label{lem:moment}
+For $t=a+b\ge1$ and $n\ge1$, $X^{(a,b)}=Z_{n,t}^{-1}\sum_{U\in\Sigma(q_{a,b})}R(U)$ with
+$Z_{n,t}=D\prod_{i=0}^{t-2}(D+2^i)$.
+\end{lemma}
+\begin{proof}
+For $b=0$ this is~\cite[Thm.~5.3]{GNW2021}, valid for all $n,t\ge1$. In general $\ket{\bar S}\!\bra{\bar S}$ is the
+transpose of $\ket S\!\bra S$, so $X^{(a,b)}$ is the partial transpose of $X^{(t,0)}$ on the last $b$ factors. On a
+single relation, $r(U)^{\Gamma_B}=\sum_{(x,y)\in U}\ket{x_A y_B}\!\bra{y_A x_B}=r(U')$ with
+$U'=\{((x_A,y_B),(y_A,x_B))\}$. The map $U\mapsto U'$ preserves dimension and $\one_{2t}$, and
+$q_{a,b}(x_A,y_B)-q_{a,b}(y_A,x_B)=|x|-|y|$, so it is a bijection $\Sigma_{t,t}\to\Sigma(q_{a,b})$. The same statement
+appears as~\cite[Lemma~6]{HayashiLu2026}.
+\end{proof}
+
+\paragraph{Composition.} For $U_1,U_2\in\Sigma$ let $U_1\circ U_2=\{(x,z):\exists y,\ (x,y)\in U_1,(y,z)\in U_2\}$
+and $d(U_1,U_2)=\dim\big(N_R(U_1)\cap N_L(U_2)\big)$.
+
+\begin{lemma}\label{lem:comp}
+$r(U_1)r(U_2)=2^{d(U_1,U_2)}\,r(U_1\circ U_2)$ and $U_1\circ U_2\in\Sigma$. Hence $R(U_1)R(U_2)=D^{d}R(U_1\circ U_2)$.
+\end{lemma}
+\begin{proof}
+The coefficient of $\ket x\!\bra z$ in $r(U_1)r(U_2)$ counts $y$ with $(x,y)\in U_1$, $(y,z)\in U_2$; this set is
+empty or a coset of $N_R(U_1)\cap N_L(U_2)$. The fibre product $\{(x,y,z)\}$ has dimension
+$2t-\dim(\pi_2U_1+\pi_1U_2)=2t-(t-d)=t+d$, using $(\pi_2U_1)^\perp=N_R(U_1)$ and $(\pi_1U_2)^\perp=N_L(U_2)$ (from
+$U=U^\perp$); its projection to $U_1\circ U_2$ has kernel of dimension $d$, so $\dim U_1\circ U_2=t$. If $y$ witnesses
+$(x,z)$ then $q(x)-q(z)=(q(x)-q(y))+(q(y)-q(z))=0$, and $\one_{2t}\in U_1\circ U_2$ because it lies in both.
+\end{proof}
+
+Let $\mathcal A$ be the algebra with basis $\{e_U\}_{U\in\Sigma}$ and product $e_Ue_{U'}=D^{d(U,U')}e_{U\circ U'}$.
+It has unit $e_\Delta$ for the diagonal $\Delta=\{(x,x)\}\in\Sigma$, and by Lemma~\ref{lem:comp} and
+bilinearity the map $\varphi(e_U)=R(U)$ satisfies $\varphi(uv)=\varphi(u)\varphi(v)$ and $\varphi(e_\Delta)=I$
+(associativity of $\mathcal A$ is never used). Put $x=Z^{-1}\sum_Ue_U$, so $\varphi(x)=X^{(a,b)}$, and let $M$ be
+the matrix of left multiplication by $x$:
+\[
+M_{U'',U'}=Z^{-1}\sum_{U:\ U\circ U'=U''}D^{d(U,U')}\ \ge0 .
+\]
+
+\begin{lemma}[Spectrum]\label{lem:spec}
+$\lambda_{\max}(X^{(a,b)})=\rho(M)$, the spectral radius of $M$.
+\end{lemma}
+\begin{proof}
+Since $M^je_\Delta=x(x(\cdots(xe_\Delta)))$ and $\varphi$ is multiplicative, $\varphi(M^je_\Delta)=X^j$; so for the
+minimal polynomial $p$ of $M$ we get $0=\varphi(p(M)e_\Delta)=p(X)$; hence every eigenvalue of $X$ is a root of
+$p$, i.e.\ an eigenvalue of $M$, and $\lambda_{\max}(X)\le\rho(M)$. Conversely, let $y\ge0$, $y\ne0$, satisfy $My=\rho(M)y$
+(Perron--Frobenius for nonnegative matrices; no irreducibility is needed). Then $X\varphi(y)=\varphi(xy)=\rho(M)
+\varphi(y)$. Every $U\in\Sigma$ contains $(\one_t,\one_t)$, so $\bra{\one_t^{\otimes n}}R(U)\ket{\one_t^{\otimes n}}=1$
+and $\bra{\one_t^{\otimes n}}\varphi(y)\ket{\one_t^{\otimes n}}=\sum_Uy_U>0$. Hence $\varphi(y)\ne0$ and $\rho(M)$ is
+an eigenvalue of $X$.
+\end{proof}
+
+\section{The Witt index of \texorpdfstring{$q_{a,b}$}{q(a,b)}}\label{sec:witt}
+Let $w(q)$ be the largest dimension of a subspace $W\subseteq V$ with $q|_W=0$. Doubly-even binary codes of length $m$
+are exactly the totally isotropic subspaces of $q_{m,0}$, so $\kappa(m)=w(q_{m,0})$.
+
+\begin{proposition}\label{prop:witt}
+Let $\mu(j)=0,1,2,3,2,3,2,1$ for $j\equiv0,\dots,7\pmod8$. Then $w(q_{a,b})=\big(t-\mu(a-b)\big)/2$. Equivalently
+$\kappa(m)=4\lfloor m/8\rfloor+(0,0,0,0,1,1,2,3)_{m\bmod 8}$ and $w(q_{a,b})=\min(a,b)+\kappa(|a-b|)$.
+\end{proposition}
+\begin{proof}
+\emph{Upper bound.} (i) $0=q(2x)=2q(x)+2\beta(x,x)$, so $q(x)\equiv\beta(x,x)\pmod2$. (ii) The Gauss sum factorizes
+over coordinates: $\gamma(q)=\sum_xi^{q(x)}=(1+i)^a(1-i)^b=2^{t/2}\zeta_8^{a-b}$. (iii) If $q|_W=0$ then
+$\beta|_W=0$; for $x\notin W^\perp$, $\sum_{w\in W}i^{q(x+w)}=i^{q(x)}\sum_w(-1)^{\beta(x,w)}=0$, while $q$ is constant
+on cosets of $W$ in $W^\perp$. Hence $\gamma(q)=|W|\gamma(\bar q)$ for the induced form on $W^\perp/W$, which has
+dimension $m=t-2\dim W$, a nondegenerate polar form, and $\gamma(\bar q)=2^{m/2}\zeta_8^{a-b}$. (iv) If $m=0$ then
+$\gamma(\bar q)=1$, forcing $a-b\equiv0\pmod8$; if $m=1$ the single basis vector has odd $\bar q$ by (i), so
+$\gamma(\bar q)=1\pm i$, forcing $a-b\equiv\pm1$. With $m\equiv a-b\pmod2$ this gives $m\ge\mu(a-b)$, i.e.
+$\dim W\le(t-\mu(a-b))/2$.
+
+\emph{Lower bound.} The words $1111$; $11110$; $\{111100,110011\}$; the $[7,3]$ simplex code; and the extended Hamming
+$[8,4,4]$ code are doubly even, of dimensions $1,1,2,3,4$ at lengths $4,5,6,7,8$. Direct sums with the $[8,4,4]$ code
+give $\kappa(m+8)\ge\kappa(m)+4$, so $\kappa(m)\ge(m-\mu(m))/2$, with equality by the upper bound. For $q_{a,b}$
+with $a\ge b$, the $b$ vectors $e_{A_i}+e_{B_i}$ ($q=1-1=0$, disjoint supports) together with a maximal doubly-even
+code on the remaining $a-b$ coordinates of $A$ span a totally isotropic subspace of dimension $b+\kappa(a-b)$; the
+case $a<b$ follows by exchanging $A$ and $B$ and replacing $q$ by $-q$. Since $\kappa(m)=(m-\mu(m))/2$, this matches
+the upper bound.
+\end{proof}
+
+\section{The top eigenvalue}\label{sec:main}
+For $s\ge1$ set $F_s=\prod_{i=0}^{s-2}(2^i+1)\big/\big(D\prod_{i=0}^{s-2}(D+2^i)\big)$, and write
+$(D)_k=\prod_{i<k}(D-2^i)$, $c_k=\prod_{i=0}^{t-k-2}(2^i+1)$, and $\binom{r}{k}_2$ for the Gaussian binomial. The
+\emph{level} of $U'\in\Sigma$ is $\dim N_L(U')$.
+
+\begin{lemma}[Column sums]\label{lem:col}
+The column of $M$ indexed by $U'$ sums to $Z^{-1}\sum_{U\in\Sigma}D^{\dim(N_R(U)\cap N_L(U'))}$, and if $U'$ has
+level $r$ this equals $Z^{-1}S_t(r)$ with $S_t(r)=\sum_{k=0}^r\binom rk_2(D)_k\,c_k$.
+\end{lemma}
+\begin{proof}
+Each $U$ contributes to exactly one row ($U''=U\circ U'$), which gives the first expression. For a subspace $W$,
+$D^{\dim W}=|W|^n=\sum_{K\le W}(D)_{\dim K}$, by grouping $n$-tuples of vectors of $W$ according to their span ($(D)_k$
+counts surjections $\F_2^n\to K$, and vanishes when $k>n$). Exchanging sums,
+$\sum_UD^{\dim(N_R(U)\cap K')}=\sum_{K\le K'}(D)_{\dim K}\,\#\{U:K\le N_R(U)\}$ with $K'=N_L(U')$, and
+Lemma~\ref{lem:count} evaluates the count as $c_{\dim K}$.
+\end{proof}
+
+\begin{lemma}[Counting]\label{lem:count}
+For every subspace $K\le V$ of dimension $k$ that is totally isotropic for $q_{a,b}$,
+$\#\{U\in\Sigma:(0\oplus K)\subseteq U\}=c_k$.
+\end{lemma}
+\begin{proof}
+Let $J=\langle\one_{2t}\rangle\oplus(0\oplus K)$. Elements of $K$ have $q=0$, hence even weight, so
+$(\beta\oplus\beta)(\one_{2t},(0,h))=0$ for $h\in K$ and $J$ is totally isotropic for $q\oplus-q$, of dimension $k+1$.
+On $J^\perp\subseteq\one_{2t}^\perp$ the form $q\oplus-q$ takes even values, so $Q=(q\oplus-q)/2\bmod2$ is an
+$\F_2$-quadratic form there with polar form $\beta\oplus\beta$; its radical on $J^\perp$ is $J$, so $Q$ induces a
+nondegenerate quadratic form on $J^\perp/J$, of dimension $2m$ with $m=t-1-k$. Elements of $\Sigma$ containing $J$
+correspond bijectively to Lagrangians (maximal totally singular subspaces) of $J^\perp/J$. A Lagrangian exists:
+$U_K=\{(u,v):u,v\in K^\perp,\ u+v\in K\}$ has dimension $t$, contains $J$ (since $\one_t\in K^\perp$), and satisfies
+$q(u)-q(u+h)=-q(h)-2\beta(u,h)=0$ for $h\in K$. A nondegenerate $2m$-dimensional $\F_2$-quadratic space containing a
+totally singular $m$-space is an orthogonal sum of $m$ hyperbolic planes (choose $e$ in it and $f$ with
+$\beta(e,f)=1$, replace $f$ by $f+Q(f)e$, and induct). In such a space the Lagrangians number $N(m)=\prod_{i=0}^{m-1}
+(2^i+1)$: with a hyperbolic pair $(e_0,f_0)$ split off, one Lagrangian contains $e_0$ for each Lagrangian $L'$ of the
+residual space, and those not containing $e_0$ are $\{x+\phi(x)e_0:x\in L'\}\oplus\langle f_0+w+Q(w)e_0\rangle$ for
+a linear functional $\phi$ on $L'$ and any $w$ in the residual space with $\beta(w,x)=\phi(x)$ for all $x\in L'$
+(such $w$ exist by nondegeneracy, and the resulting Lagrangian does not depend on the choice). Thus
+$N(m)=(1+2^{m-1})N(m-1)$, $N(0)=1$, and the count is $N(t-1-k)=c_k$.
+\end{proof}
+
+\begin{lemma}[A Gaussian-binomial identity]\label{lem:q}
+$S_t(r)=c_r\prod_{i=t-r-1}^{t-2}(D+2^i)$. Consequently $Z^{-1}S_t(r)=F_{t-r}$.
+\end{lemma}
+\begin{proof}
+Put $m=t-r-1$ and $a_j=\prod_{i<j}(2^{m+i}+1)$, so $c_k=c_r\,a_{r-k}$. It suffices to show
+$L_r:=\sum_k\binom rk_2(D)_ka_{r-k}=\prod_{i<r}(D+2^{m+i})$. Using $\binom rk_2=2^k\binom{r-1}k_2+\binom{r-1}{k-1}_2$,
+$a_{r-k}=a_{r-1-k}(2^{m+r-1-k}+1)$ and $(D)_k=(D)_{k-1}(D-2^{k-1})$, the two contributions to the coefficient of
+$\binom{r-1}j_2(D)_ja_{r-1-j}$ sum to $(2^{m+r-1}+2^j)+(D-2^j)=D+2^{m+r-1}$. Hence $L_r=(D+2^{m+r-1})L_{r-1}$ and
+$L_0=1$. Dividing by $Z=D\prod_{i=0}^{t-2}(D+2^i)$ gives $c_r/(D\prod_{i=0}^{t-r-2}(D+2^i))=F_{t-r}$.
+\end{proof}
+
+\begin{theorem}\label{thm:main}
+For all $a,b\ge0$ with $t=a+b\ge1$ and all $n\ge1$,
+\[
+\lambda_{\max}\big(X^{(a,b)}\big)=F_{t-w},\qquad w=\min(a,b)+\kappa(|a-b|).
+\]
+\end{theorem}
+\begin{proof}
+By Lemma~\ref{lem:spec} it suffices to show $\rho(M)=F_{t-w}$. Levels are dimensions of totally isotropic
+subspaces, so every level is at most $w$ (Proposition~\ref{prop:witt}); level $w$ is attained by $U_N$ of
+Lemma~\ref{lem:count} for a maximal isotropic $N$, since $N_L(U_N)=N$. Since $F_{s+1}/F_s=(2^{s-1}+1)/(D+2^{s-1})\le1$,
+$F_{t-r}$ is nondecreasing in $r$, so by Lemmas~\ref{lem:col}--\ref{lem:q} every column sum of $M$ is at most
+$F_{t-w}$, and $\rho(M)\le F_{t-w}$. If $(0,z)\in U'$ then $(0,z)\in U\circ U'$, because $(0,0)\in U$; so
+$N_R(U\circ U')\supseteq N_R(U')$ and the level never decreases under left multiplication (recall $\dim N_L=\dim N_R$ for every element of $\Sigma$,
+Section~\ref{sec:moments}). Ordering levels
+increasingly, $M$ is block lower-triangular, and the columns at level $w$ send all of their mass into level $w$.
+The diagonal block $M_{ww}$ therefore has every column sum equal to $F_{t-w}$, so $\one^{\mathsf T}M_{ww}=F_{t-w}
+\one^{\mathsf T}$ and $F_{t-w}$ is an eigenvalue of $M_{ww}$, hence of $M$. Thus $\rho(M)=F_{t-w}$.
+\end{proof}
+
+\begin{corollary}\label{cor:clone}
+For $1\le T\le3$, $k\ge1$ and $n\ge1$,
+\[
+P_{\rm stab}(n;T,k)=\binom{D+T-1}{T}\,F_{T+k-\kappa(k)}.
+\]
+\end{corollary}
+\begin{proof}
+Lemma~\ref{lem:red} and Theorem~\ref{thm:main} with $(a,b)=(T+k,T)$, $t=2T+k$ and $w=T+\kappa(k)$.
+\end{proof}
+
+\section{Consequences}
+\paragraph{When the universal cloner is optimal.} Let $m=T+k$. Since $\kappa(k)\ge0$ and $F_s$ is decreasing in $s$,
+Corollary~\ref{cor:clone} gives $P_{\rm stab}/D_T=F_{m-\kappa(k)}\ge F_m$. The frame-potential inequality gives
+$F_m\ge1/D_m$, with equality exactly when the ensemble is a projective $m$-design; stabilizer states are 3-designs but
+not 4-designs~\cite[Cor.~1]{KuengGross2015}, so $F_m>1/D_m$ for every $m\ge4$. Conversely, when $m\le3$ we have
+$\kappa(k)=0$ and $F_m=1/D_m$. Therefore the universal cloner is optimal exactly when $T+k\le3$, in agreement with the
+design criterion of~\cite{WeldonP2}; the first strict gap appears at $T+k=4$ (e.g.\ $1/8$ against $4/35$ at $n=2$,
+$1\to4$).
+
+\paragraph{Plateaus.} The optimum is unchanged from $k$ to $k+1$ whenever $\kappa(k+1)=\kappa(k)+1$, i.e. for
+$k+1\equiv4,6,7,0\pmod8$: for instance $1\to4$ and $1\to5$ have the same value, as do $1\to6$ through $1\to9$.
+Producing one more copy is free exactly when a longer doubly-even code becomes available.
+
+\paragraph{Many copies.} For $s\ge n+1$, cancelling powers of two gives the exact identity
+\[F_s=\frac1{N_n}\prod_{i=s-1-n}^{s-2}\big(1+2^{-i}\big),\]
+so $F_s\to1/N_n$ and $P_{\rm stab}(n;T,k)\to D_T/N_n$ as $k\to\infty$.
+For $T\le3$ the $T$-copy states form a tight frame for $\Sym^T$ (3-design property), so $D_T/N_n$ is the optimal
+probability of identifying the state from $T$ copies, attained by the pretty-good measurement (any POVM $\{E_S\}$ succeeds with probability
+$\frac1{N_n}\sum_S\bra{S^{\otimes T}}E_S\ket{S^{\otimes T}}\le\frac1{N_n}\tr\sum_SE_S=D_T/N_n$). Cloning many copies
+thus becomes identification.
+
+\paragraph{Scope.} The results concern average global fidelity; by Lemma~\ref{lem:red} they are also the worst-case
+optima over stabilizer states. Theorem~\ref{thm:main} holds for every signature, but the reduction to cloning uses
+$T\le3$; for $T\ge4$ the Clifford group is not a unitary 4-design~\cite{ZKGG2016} and the optimal dual need not be
+scalar.
+
+\section{Discussion}
+The exact optimum interpolates between Werner's universal value (few copies) and optimal identification (many copies),
+with the transition controlled by doubly-even codes. Natural next questions are the cloning value for $T\ge4$, an
+explicit optimal channel, other figures of merit such as the trace distance used in~\cite{Herasymenko2026}, and qudit
+stabilizer states, where the relevant forms and codes change. Related results concern exact stabilizer
+identification~\cite{HayashiLu2026}, efficient $O(n)$-copy learning~\cite{Montanaro2017} and sample-optimal
+bounds~\cite{Chang2026}, a sharp copy-rate threshold for fixed-target forgery of quadratic-stabilizer public keys over
+odd-prime fields~\cite{HayashiZhaoYu2026}, and the structure of the Clifford commutant
+\cite{GNW2021,MMGross2021,Bittel2026,ZKGG2016}.
+
+\paragraph{Verification.} The results are proved analytically and do not depend on computer-assisted
+certification; the following checks are supplementary. Exact symbolic certificates (the spectrum of the orbit quotient of $M$, valid for every
+$n$) were computed for the 15 signatures $(a,b)$, $a\ge b$, with $3\le t\le7$ other than the trivial $(3,3)$, and
+reproduced with the same code on two further machines. Lemmas~\ref{lem:col} and~\ref{lem:count} were verified exactly
+over all $9{,}845{,}550$ relations for each of the five signatures with $t=8$. A separate implementation written by a
+second system (its own enumeration of $\Sigma$, composition and matrix $M$) confirmed Lemmas~\ref{lem:col}
+and~\ref{lem:count} and $\rho(M)=F_{t-w}$ for the eight signatures with $a\ge b$ and $t\le5$ at $n=1,2,3$, and an
+exhaustive search confirmed Proposition~\ref{prop:witt} for all 54 signatures with $t\le9$. The cloning values agree
+with direct numerical diagonalization of the stabilizer Gram kernels for $n\le3$, exact Gram-matrix certificates at
+$n=3$, and Lanczos computations at $n=4$.
+
+\section*{Use of AI tools}
+This work used several AI systems; the author directed it and takes full responsibility for its content.
+\textbf{Grok Bot} (SpaceXAI) proposed the closed form, proved Theorem~\ref{thm:main} with
+Lemmas~\ref{lem:col}--\ref{lem:q} and the upper bound of Proposition~\ref{prop:witt}, verified the reduction of
+Lemma~\ref{lem:red}, and produced the exact certificates and the $t=8$ check. \textbf{Claude} (Anthropic; Claude
+Opus 5.5) derived the reduction of Lemma~\ref{lem:red}, wrote the proof of Lemma~\ref{lem:moment}, audited every
+proof, wrote the separate implementation and the independent numerical checks, reproduced the certificates, and
+drafted the manuscript. \textbf{ChatGPT} (OpenAI) refereed the proofs, finding a false operator identity and an
+overstated domain in earlier versions, and supplied the short proof of the spectral inclusion and the attainment
+argument in Lemma~\ref{lem:spec}, the code constructions in Proposition~\ref{prop:witt}, and the choice of $w$ in
+Lemma~\ref{lem:count}. \textbf{Perplexity} and \textbf{Consensus} carried out the prior-art searches.
+
+\section*{Data and code availability}
+Supporting code, computational certificates, logs and reproduction instructions are archived with this preprint's
+Zenodo record (file \texttt{paper3\_code.zip}) and in the folder \texttt{paper3/} of
+\url{https://github.com/Weldog/sidon-phase-cloning} (release tag \texttt{paper3-v1}).
+
+\section*{Competing interests}
+The author declares no competing interests. This work received no external funding.
+
+\bibliographystyle{unsrtnat}
+\bibliography{refs3}
+\end{document}
