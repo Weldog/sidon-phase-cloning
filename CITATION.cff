@@ -1,20 +1,18 @@
 cff-version: 1.2.0
-message: "If you use this work, please cite the paper."
-title: "Sidon Sets, Additive Energy, and the Optimal Cloning of Finite Phase-State Codebooks"
+message: "If you use this code or these results, please cite the papers below."
+title: "Exact copying limits of quantum states: code and certificates"
 authors:
   - family-names: Weldon
     given-names: Michael
     orcid: "https://orcid.org/0009-0001-6119-0560"
-    affiliation: "Independent Researcher"
-version: "v2"
-date-released: "2026-10-18"
-doi: "10.5281/zenodo.23428376"
-license: MIT
-type: software
+repository-code: "https://github.com/Weldog/sidon-phase-cloning"
 identifiers:
   - type: doi
-    value: "10.5281/zenodo.23444464"
-    description: "Version 2 (paper, certificates, QH-Lab v1.1.0)"
+    value: 10.5281/zenodo.23444464
+    description: "Paper 1"
   - type: doi
-    value: "10.5281/zenodo.23428376"
-    description: "All versions"
+    value: 10.5281/zenodo.23449679
+    description: "Paper 2"
+  - type: doi
+    value: 10.5281/zenodo.23462235
+    description: "Paper 3 (all versions)"
