@@ -6,6 +6,7 @@ Code, certificates and reproduction files for three preprints by Michael Weldon 
 | 1 | Sidon sets decide when finite phase-state codebooks are as hard to copy as continuous phase families | [10.5281/zenodo.23444464](https://doi.org/10.5281/zenodo.23444464) | [`paper/`](paper/) (certificates: [`ca_appendix/`](ca_appendix/), code: [`qh-lab/`](qh-lab/)) |
 | 2 | Universal cloning is optimal exactly for quantum designs | [10.5281/zenodo.23449679](https://doi.org/10.5281/zenodo.23449679) | [`paper2/`](paper2/) |
 | 3 | Exact optimal cloning of stabilizer states, and the price of measuring first (v2) | [10.5281/zenodo.23462235](https://doi.org/10.5281/zenodo.23462235) (all versions) | [`paper3/`](paper3/) |
+| 4 | Coherent versus Measure-First Copying of Phase-State Codebooks: Exact Leak-Order Laws | [10.5281/zenodo.23651149](https://doi.org/10.5281/zenodo.23651149) | [`paper4/`](paper4/) |
 
 Each folder contains the paper's code and certificates; Paper 3 v2's full certificate bundle (paper3_v2_certificates.zip) has a README with one command per theorem.
 
